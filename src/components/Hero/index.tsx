@@ -1,4 +1,5 @@
-import Link from "next/link";
+import Link from "next/link"
+import { CalendarIcon, MapPinIcon, UsersIcon, PlaneIcon } from "lucide-react"
 
 const Hero = () => {
   return (
@@ -12,26 +13,150 @@ const Hero = () => {
             <div className="w-full px-4">
               <div className="mx-auto max-w-[800px] text-center">
                 <h1 className="mb-5 text-3xl font-bold leading-tight text-black dark:text-white sm:text-4xl sm:leading-tight md:text-5xl md:leading-tight">
-                  Free and Open-Source Next.js Template for Startup & SaaS
+                  Descubre el mundo con <span className="text-primary">Ali Airways</span>
                 </h1>
-                <p className="mb-12 text-base leading-relaxed! text-body-color dark:text-body-color-dark sm:text-lg md:text-xl">
-                  Startup is free Next.js template for startups and SaaS
-                  business websites comes with all the essential pages,
-                  components, and sections you need to launch a complete
-                  business website, built-with Next 13.x and Tailwind CSS.
+                <p className="mb-12 text-base leading-relaxed text-body-color dark:text-body-color-dark sm:text-lg md:text-xl">
+                  Viaja con comodidad y estilo a los mejores destinos nacionales e internacionales. Disfruta de un
+                  servicio de primera clase a precios accesibles.
                 </p>
+
+                {/* Buscador de Vuelos */}
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 mb-8">
+                  <h3 className="text-xl font-semibold mb-4 text-black dark:text-white">Encuentra tu próximo vuelo</h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {/* Origen */}
+                    <div className="relative">
+                      <label
+                        htmlFor="origen"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 text-left"
+                      >
+                        Origen
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <MapPinIcon className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                          type="text"
+                          id="origen"
+                          className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-primary focus:border-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          placeholder="Ciudad de origen"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Destino */}
+                    <div className="relative">
+                      <label
+                        htmlFor="destino"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 text-left"
+                      >
+                        Destino
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <MapPinIcon className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                          type="text"
+                          id="destino"
+                          className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-primary focus:border-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          placeholder="Ciudad de destino"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Fecha de salida */}
+                    <div className="relative">
+                      <label
+                        htmlFor="fecha-salida"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 text-left"
+                      >
+                        Fecha de salida
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <CalendarIcon className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                          type="date"
+                          id="fecha-salida"
+                          className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-primary focus:border-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Fecha de regreso */}
+                    <div className="relative">
+                      <label
+                        htmlFor="fecha-regreso"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 text-left"
+                      >
+                        Fecha de regreso
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <CalendarIcon className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                          type="date"
+                          id="fecha-regreso"
+                          className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-primary focus:border-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Número de pasajeros */}
+                    <div className="relative">
+                      <label
+                        htmlFor="pasajeros"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 text-left"
+                      >
+                        Pasajeros
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <UsersIcon className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <select
+                          id="pasajeros"
+                          className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-primary focus:border-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        >
+                          <option value="1">1 Pasajero</option>
+                          <option value="2">2 Pasajeros</option>
+                          <option value="3">3 Pasajeros</option>
+                          <option value="4">4 Pasajeros</option>
+                          <option value="5">5+ Pasajeros</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Botón de búsqueda */}
+                    <div className="relative flex items-end">
+                      <button
+                        type="button"
+                        className="w-full bg-primary hover:bg-primary/80 text-white font-semibold py-2 px-4 rounded-md transition duration-300 ease-in-out flex items-center justify-center"
+                      >
+                        <PlaneIcon className="h-5 w-5 mr-2" />
+                        Buscar vuelos
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="flex flex-col items-center justify-center space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
                   <Link
-                    href="https://nextjstemplates.com/templates/saas-starter-startup"
-                    className="rounded-xs bg-primary px-8 py-4 text-base font-semibold text-white duration-300 ease-in-out hover:bg-primary/80"
+                    href="#ofertas"
+                    className="rounded-md bg-primary px-8 py-4 text-base font-semibold text-white duration-300 ease-in-out hover:bg-primary/80"
                   >
-                    🔥 Get Pro
+                    Ver ofertas especiales
                   </Link>
                   <Link
-                    href="https://github.com/NextJSTemplates/startup-nextjs"
-                    className="inline-block rounded-xs bg-black px-8 py-4 text-base font-semibold text-white duration-300 ease-in-out hover:bg-black/90 dark:bg-white/10 dark:text-white dark:hover:bg-white/5"
+                    href="#destinos"
+                    className="inline-block rounded-md bg-black px-8 py-4 text-base font-semibold text-white duration-300 ease-in-out hover:bg-black/90 dark:bg-white/10 dark:text-white dark:hover:bg-white/5"
                   >
-                    Star on GitHub
+                    Explorar destinos
                   </Link>
                 </div>
               </div>
@@ -39,31 +164,10 @@ const Hero = () => {
           </div>
         </div>
         <div className="absolute right-0 top-0 z-[-1] opacity-30 lg:opacity-100">
-          <svg
-            width="450"
-            height="556"
-            viewBox="0 0 450 556"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <circle
-              cx="277"
-              cy="63"
-              r="225"
-              fill="url(#paint0_linear_25:217)"
-            />
-            <circle
-              cx="17.9997"
-              cy="182"
-              r="18"
-              fill="url(#paint1_radial_25:217)"
-            />
-            <circle
-              cx="76.9997"
-              cy="288"
-              r="34"
-              fill="url(#paint2_radial_25:217)"
-            />
+          <svg width="450" height="556" viewBox="0 0 450 556" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="277" cy="63" r="225" fill="url(#paint0_linear_25:217)" />
+            <circle cx="17.9997" cy="182" r="18" fill="url(#paint1_radial_25:217)" />
+            <circle cx="76.9997" cy="288" r="34" fill="url(#paint2_radial_25:217)" />
             <circle
               cx="325.486"
               cy="302.87"
@@ -177,13 +281,7 @@ const Hero = () => {
           </svg>
         </div>
         <div className="absolute bottom-0 left-0 z-[-1] opacity-30 lg:opacity-100">
-          <svg
-            width="364"
-            height="201"
-            viewBox="0 0 364 201"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
+          <svg width="364" height="201" viewBox="0 0 364 201" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path
               d="M5.88928 72.3303C33.6599 66.4798 101.397 64.9086 150.178 105.427C211.155 156.076 229.59 162.093 264.333 166.607C299.076 171.12 337.718 183.657 362.889 212.24"
               stroke="url(#paint0_linear_25:218)"
@@ -281,7 +379,7 @@ const Hero = () => {
         </div>
       </section>
     </>
-  );
-};
+  )
+}
 
-export default Hero;
+export default Hero

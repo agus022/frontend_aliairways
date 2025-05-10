@@ -1,44 +1,44 @@
-import { Testimonial } from "@/types/testimonial";
-import SectionTitle from "../Common/SectionTitle";
-import SingleTestimonial from "./SingleTestimonial";
+import type { Testimonial } from "@/types/testimonial"
+import SectionTitle from "../Common/SectionTitle"
+import SingleTestimonial from "./SingleTestimonial"
 
 const testimonialData: Testimonial[] = [
   {
     id: 1,
-    name: "Musharof Chy",
-    designation: "Founder @TailGrids",
+    name: "Oscar Hurtado",
+    designation: "Viajero Frecuente",
     content:
-      "Our members are so impressed. It's intuitive. It's clean. It's distraction free. If you're building a community.",
+      "Mi experiencia con Ali Airways ha sido excepcional. La puntualidad de los vuelos y la atención del personal de cabina superaron mis expectativas. Definitivamente mi aerolínea preferida para viajes de negocios.",
     image: "/images/testimonials/auth-01.png",
     star: 5,
   },
   {
     id: 2,
-    name: "Devid Weilium",
-    designation: "Founder @UIdeck",
+    name: "Luis Farid",
+    designation: "Viajero Internacional",
     content:
-      "Our members are so impressed. It's intuitive. It's clean. It's distraction free. If you're building a community.",
+      "He volado con muchas aerolíneas, pero Ali Airways ofrece la mejor relación calidad-precio. Los asientos son cómodos, el entretenimiento a bordo es excelente y el personal siempre está dispuesto a ayudar.",
     image: "/images/testimonials/auth-02.png",
     star: 5,
   },
   {
     id: 3,
-    name: "Lethium Frenci",
-    designation: "Founder @Lineicons",
+    name: "Jose Alfredo",
+    designation: "Turista Frecuente",
     content:
-      "Our members are so impressed. It's intuitive. It's clean. It's distraction free. If you're building a community.",
+      "Viajar con Ali Airways ha transformado mi experiencia de vuelo. El proceso de check-in es rápido, la comida a bordo es deliciosa y los precios son muy competitivos. ¡No puedo esperar para mi próximo viaje con ellos!",
     image: "/images/testimonials/auth-03.png",
     star: 5,
   },
-];
+]
 
 const Testimonials = () => {
   return (
     <section className="dark:bg-bg-color-dark bg-gray-light relative z-10 py-16 md:py-20 lg:py-28">
       <div className="container">
         <SectionTitle
-          title="What Our Users Says"
-          paragraph="There are many variations of passages of Lorem Ipsum available but the majority have suffered alteration in some form."
+          title="Lo Que Dicen Nuestros Pasajeros"
+          paragraph="Descubre por qué nuestros pasajeros eligen Ali Airways para sus viajes. Experiencias reales que reflejan nuestro compromiso con la excelencia y el servicio de calidad."
           center
         />
 
@@ -49,13 +49,7 @@ const Testimonials = () => {
         </div>
       </div>
       <div className="absolute right-0 top-5 z-[-1]">
-        <svg
-          width="238"
-          height="531"
-          viewBox="0 0 238 531"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
+        <svg width="238" height="531" viewBox="0 0 238 531" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect
             opacity="0.3"
             x="422.819"
@@ -103,13 +97,7 @@ const Testimonials = () => {
         </svg>
       </div>
       <div className="absolute bottom-5 left-0 z-[-1]">
-        <svg
-          width="279"
-          height="106"
-          viewBox="0 0 279 106"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
+        <svg width="279" height="106" viewBox="0 0 279 106" fill="none" xmlns="http://www.w3.org/2000/svg">
           <g opacity="0.5">
             <path
               d="M-57 12L50.0728 74.8548C55.5501 79.0219 70.8513 85.7589 88.2373 79.3692C109.97 71.3821 116.861 60.9642 156.615 63.7423C178.778 65.291 195.31 69.2985 205.911 62.3533C216.513 55.408 224.994 47.7682 243.016 49.1572C255.835 50.1453 265.278 50.8936 278 45.3373"
@@ -177,7 +165,7 @@ const Testimonials = () => {
         </svg>
       </div>
     </section>
-  );
-};
+  )
+}
 
-export default Testimonials;
+export default Testimonials

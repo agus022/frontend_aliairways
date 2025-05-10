@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Image from "next/image"
 
 const AboutSectionTwo = () => {
   return (
@@ -6,19 +6,16 @@ const AboutSectionTwo = () => {
       <div className="container">
         <div className="-mx-4 flex flex-wrap items-center">
           <div className="w-full px-4 lg:w-1/2">
-            <div
-              className="relative mx-auto mb-12 aspect-25/24 max-w-[500px] text-center lg:m-0"
-              data-wow-delay=".15s"
-            >
+            <div className="relative mx-auto mb-12 aspect-25/24 max-w-[500px] text-center lg:m-0" data-wow-delay=".15s">
               <Image
                 src="/images/about/about-image-2.svg"
-                alt="about image"
+                alt="Fundadores de Ali Airways"
                 fill
                 className="drop-shadow-three dark:hidden dark:drop-shadow-none"
               />
               <Image
                 src="/images/about/about-image-2-dark.svg"
-                alt="about image"
+                alt="Fundadores de Ali Airways"
                 fill
                 className="hidden drop-shadow-three dark:block dark:drop-shadow-none"
               />
@@ -28,29 +25,30 @@ const AboutSectionTwo = () => {
             <div className="max-w-[470px]">
               <div className="mb-9">
                 <h3 className="mb-4 text-xl font-bold text-black dark:text-white sm:text-2xl lg:text-xl xl:text-2xl">
-                  Bug free code
+                  Nuestros Fundadores
                 </h3>
                 <p className="text-base font-medium leading-relaxed text-body-color sm:text-lg sm:leading-relaxed">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-                  do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                  Ali Airways fue fundada por cuatro estudiantes visionarios del Tecnológico de México en Celaya, quienes
+                  combinaron sus talentos y pasión por la aviación para crear una aerolínea diferente.
                 </p>
               </div>
               <div className="mb-9">
                 <h3 className="mb-4 text-xl font-bold text-black dark:text-white sm:text-2xl lg:text-xl xl:text-2xl">
-                  Premier support
+                  Equipo Directivo
                 </h3>
                 <p className="text-base font-medium leading-relaxed text-body-color sm:text-lg sm:leading-relaxed">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-                  do eiusmod tempor incididunt.
+                  <strong>Ali Vladimir Cañada</strong> (CEO), <strong>Agustin Flores</strong> (COO),{" "}
+                  <strong>Natasha Sevilla</strong> (CMO), <strong>Cristian Castañeda</strong> (CTO) {" "}
+                   lideran nuestra compañía con innovación y compromiso.
                 </p>
               </div>
               <div className="mb-1">
                 <h3 className="mb-4 text-xl font-bold text-black dark:text-white sm:text-2xl lg:text-xl xl:text-2xl">
-                  Next.js
+                  Nuestra Misión
                 </h3>
                 <p className="text-base font-medium leading-relaxed text-body-color sm:text-lg sm:leading-relaxed">
-                  Lorem ipsum dolor sit amet, sed do eiusmod tempor incididunt
-                  consectetur adipiscing elit setim.
+                  Conectar personas y destinos con un servicio de excelencia, seguridad y responsabilidad ambiental,
+                  transformando cada vuelo en una experiencia memorable para nuestros pasajeros.
                 </p>
               </div>
             </div>
@@ -58,7 +56,7 @@ const AboutSectionTwo = () => {
         </div>
       </div>
     </section>
-  );
-};
+  )
+}
 
-export default AboutSectionTwo;
+export default AboutSectionTwo

@@ -13,8 +13,8 @@ const ContactPage = () => {
   return (
     <>
       <Breadcrumb
-        pageName="Contact Page"
-        description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. In varius eros eget sapien consectetur ultrices. Ut quis dapibus libero."
+        pageName="Contáctanos"
+        description="Ya sea una consulta, sugerencia o asistencia con tu viaje, en Ali Airways estamos listos para escucharte. Tu comodidad y confianza son nuestra prioridad."
       />
 
       <Contact />

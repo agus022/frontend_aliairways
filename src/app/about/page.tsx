@@ -14,8 +14,8 @@ const AboutPage = () => {
   return (
     <>
       <Breadcrumb
-        pageName="About Page"
-        description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. In varius eros eget sapien consectetur ultrices. Ut quis dapibus libero."
+        pageName="Acerca de Nosotros"
+        description="En Ali Airways, creemos que volar no es solo trasladarse: es una experiencia, una oportunidad de descubrir el mundo con confianza, comodidad y calidez. Nuestra misión es llevarte más allá de las nubes, con un servicio que se siente como en casa."
       />
       <AboutSectionOne />
       <AboutSectionTwo />

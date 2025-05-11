@@ -1,12 +1,10 @@
-import Link from "next/link";
-
-import { Metadata } from "next";
+import Link from "next/link"
+import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Error Page | Free Next.js Template for Startup and SaaS",
-  description: "This is Error Page for Startup Nextjs Template",
-  // other metadata
-};
+  title: "Página no encontrada | Ali Airways",
+  description: "Lo sentimos, parece que este vuelo no existe en nuestro itinerario.",
+}
 
 const ErrorPage = () => {
   return (
@@ -36,13 +34,7 @@ const ErrorPage = () => {
                       stroke="url(#paint1_linear_116:1137)"
                       strokeWidth="3"
                     />
-                    <circle
-                      opacity="0.8"
-                      cx="227.5"
-                      cy="81.5"
-                      r="68.5"
-                      fill="#4A6CF7"
-                    />
+                    <circle opacity="0.8" cx="227.5" cy="81.5" r="68.5" fill="#4A6CF7" />
                     <mask
                       id="mask0_116:1137"
                       style={{ maskType: "alpha" }}
@@ -52,29 +44,12 @@ const ErrorPage = () => {
                       width="137"
                       height="137"
                     >
-                      <circle
-                        opacity="0.8"
-                        cx="227.5"
-                        cy="81.5"
-                        r="68.5"
-                        fill="#4A6CF7"
-                      />
+                      <circle opacity="0.8" cx="227.5" cy="81.5" r="68.5" fill="#4A6CF7" />
                     </mask>
                     <g mask="url(#mask0_116:1137)">
-                      <circle
-                        opacity="0.8"
-                        cx="227.5"
-                        cy="81.5"
-                        r="68.5"
-                        fill="url(#paint2_radial_116:1137)"
-                      />
+                      <circle opacity="0.8" cx="227.5" cy="81.5" r="68.5" fill="url(#paint2_radial_116:1137)" />
                       <g opacity="0.8" filter="url(#filter0_f_116:1137)">
-                        <circle
-                          cx="233.543"
-                          cy="49.2645"
-                          r="28.2059"
-                          fill="white"
-                        />
+                        <circle cx="233.543" cy="49.2645" r="28.2059" fill="white" />
                       </g>
                     </g>
                     <path
@@ -94,16 +69,8 @@ const ErrorPage = () => {
                         colorInterpolationFilters="sRGB"
                       >
                         <feFlood floodOpacity="0" result="BackgroundImageFix" />
-                        <feBlend
-                          mode="normal"
-                          in="SourceGraphic"
-                          in2="BackgroundImageFix"
-                          result="shape"
-                        />
-                        <feGaussianBlur
-                          stdDeviation="15"
-                          result="effect1_foregroundBlur_116:1137"
-                        />
+                        <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
+                        <feGaussianBlur stdDeviation="15" result="effect1_foregroundBlur_116:1137" />
                       </filter>
                       <linearGradient
                         id="paint0_linear_116:1137"
@@ -142,30 +109,29 @@ const ErrorPage = () => {
                   </svg>
                 </div>
                 <h3 className="mb-4 text-3xl font-bold text-black dark:text-white sm:text-4xl">
-                  Sorry, the page can’t be found
+                  ¡Este vuelo ha sido desviado!
                 </h3>
+                <p className="mb-6 text-base font-medium leading-relaxed text-body-color sm:text-lg sm:leading-relaxed">
+                  Parece que intentaste abordar un vuelo que no está en nuestro itinerario.
+                </p>
                 <p className="mb-10 text-base font-medium leading-relaxed text-body-color sm:text-lg sm:leading-relaxed">
-                  The page you were looking for appears to have been moved,
-                  deleted or does not exist.
+                  <span className="italic">
+                    "Lamentamos informarle que su destino digital ha experimentado turbulencias y ha sido redirigido al
+                    espacio aéreo 404. Por favor, regrese a la terminal principal."
+                  </span>
                 </p>
                 <Link
                   href="/"
                   className="px-8 py-3 text-base font-bold text-white duration-300 rounded-md bg-primary shadow-signUp hover:bg-white hover:text-primary md:px-9 lg:px-8 xl:px-9"
                 >
-                  Back to Homepage
+                  Volver a la Página Principal
                 </Link>
               </div>
             </div>
           </div>
         </div>
         <div className="absolute bottom-0 left-0 z-[-1] hidden sm:block">
-          <svg
-            width="406"
-            height="286"
-            viewBox="0 0 406 286"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
+          <svg width="406" height="286" viewBox="0 0 406 286" fill="none" xmlns="http://www.w3.org/2000/svg">
             <g opacity="0.5">
               <rect
                 opacity="0.5"
@@ -345,13 +311,7 @@ const ErrorPage = () => {
           </svg>
         </div>
         <div className="absolute right-0 top-0 z-[-1] hidden sm:block">
-          <svg
-            width="406"
-            height="286"
-            viewBox="0 0 406 286"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
+          <svg width="406" height="286" viewBox="0 0 406 286" fill="none" xmlns="http://www.w3.org/2000/svg">
             <g opacity="0.5">
               <rect
                 opacity="0.5"
@@ -532,7 +492,7 @@ const ErrorPage = () => {
         </div>
       </section>
     </>
-  );
-};
+  )
+}
 
-export default ErrorPage;
+export default ErrorPage

@@ -1,47 +1,88 @@
-import Link from "next/link"
-import { CalendarIcon, MapPinIcon, UsersIcon, PlaneIcon } from "lucide-react"
+"use client"
+
+import type React from "react"
+
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { Search, Calendar, Users } from "lucide-react"
 
 const Hero = () => {
+  const router = useRouter()
+  const [searchParams, setSearchParams] = useState({
+    origin: "",
+    destination: "",
+    departureDate: "",
+    returnDate: "",
+    passengers: "1",
+  })
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
+    setSearchParams((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+
+    // Construir query string para la URL
+    const queryParams = new URLSearchParams()
+    Object.entries(searchParams).forEach(([key, value]) => {
+      if (value) queryParams.append(key, value)
+    })
+
+    // Redireccionar a la página de resultados
+    router.push(`/resultados-busqueda?${queryParams.toString()}`)
+  }
+
   return (
     <>
       <section
         id="home"
-        className="relative z-10 overflow-hidden bg-white pb-16 pt-[120px] dark:bg-gray-dark md:pb-[120px] md:pt-[150px] xl:pb-[160px] xl:pt-[180px] 2xl:pb-[200px] 2xl:pt-[210px]"
+        className="relative z-10 overflow-hidden pt-[120px] pb-16 md:pt-[150px] md:pb-[120px] xl:pt-[180px] xl:pb-[160px] 2xl:pt-[210px] 2xl:pb-[200px]"
       >
         <div className="container">
-          <div className="-mx-4 flex flex-wrap">
+          <div className="flex flex-wrap">
             <div className="w-full px-4">
-              <div className="mx-auto max-w-[800px] text-center">
+              <div className="wow fadeInUp mx-auto max-w-[800px] text-center" data-wow-delay=".2s">
                 <h1 className="mb-5 text-3xl font-bold leading-tight text-black dark:text-white sm:text-4xl sm:leading-tight md:text-5xl md:leading-tight">
-                  Descubre el mundo con <span className="text-primary">Ali Airways</span>
+                  Descubre el Mundo con Ali Airways
                 </h1>
-                <p className="mb-12 text-base leading-relaxed text-body-color dark:text-body-color-dark sm:text-lg md:text-xl">
-                  Viaja con comodidad y estilo a los mejores destinos nacionales e internacionales. Disfruta de un
-                  servicio de primera clase a precios accesibles.
+                <p className="mb-12 text-base font-medium !leading-relaxed text-body-color dark:text-white dark:opacity-90 sm:text-lg md:text-xl">
+                  Vuelos cómodos, seguros y puntuales a los mejores destinos nacionales e internacionales.
                 </p>
+              </div>
+            </div>
+          </div>
+        </div>
 
-                {/* Buscador de Vuelos */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 mb-8">
-                  <h3 className="text-xl font-semibold mb-4 text-black dark:text-white">Encuentra tu próximo vuelo</h3>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* Formulario de búsqueda */}
+        <div className="container">
+          <div className="flex flex-wrap">
+            <div className="w-full px-4">
+              <div className="wow fadeInUp mx-auto max-w-[800px]" data-wow-delay=".3s">
+                <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     {/* Origen */}
                     <div className="relative">
                       <label
-                        htmlFor="origen"
-                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 text-left"
+                        htmlFor="origin"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                       >
                         Origen
                       </label>
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <MapPinIcon className="h-5 w-5 text-gray-400" />
+                          <Search className="h-5 w-5 text-gray-400" />
                         </div>
                         <input
                           type="text"
-                          id="origen"
-                          className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-primary focus:border-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          id="origin"
+                          name="origin"
+                          value={searchParams.origin}
+                          onChange={handleChange}
                           placeholder="Ciudad de origen"
+                          required
+                          className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                         />
                       </div>
                     </div>
@@ -49,40 +90,50 @@ const Hero = () => {
                     {/* Destino */}
                     <div className="relative">
                       <label
-                        htmlFor="destino"
-                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 text-left"
+                        htmlFor="destination"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                       >
                         Destino
                       </label>
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <MapPinIcon className="h-5 w-5 text-gray-400" />
+                          <Search className="h-5 w-5 text-gray-400" />
                         </div>
                         <input
                           type="text"
-                          id="destino"
-                          className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-primary focus:border-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          id="destination"
+                          name="destination"
+                          value={searchParams.destination}
+                          onChange={handleChange}
                           placeholder="Ciudad de destino"
+                          required
+                          className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                         />
                       </div>
                     </div>
+                  </div>
 
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     {/* Fecha de salida */}
                     <div className="relative">
                       <label
-                        htmlFor="fecha-salida"
-                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 text-left"
+                        htmlFor="departureDate"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                       >
-                        Fecha de salida
+                        Fecha de Salida
                       </label>
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <CalendarIcon className="h-5 w-5 text-gray-400" />
+                          <Calendar className="h-5 w-5 text-gray-400" />
                         </div>
                         <input
                           type="date"
-                          id="fecha-salida"
-                          className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-primary focus:border-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          id="departureDate"
+                          name="departureDate"
+                          value={searchParams.departureDate}
+                          onChange={handleChange}
+                          required
+                          className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                         />
                       </div>
                     </div>
@@ -90,80 +141,70 @@ const Hero = () => {
                     {/* Fecha de regreso */}
                     <div className="relative">
                       <label
-                        htmlFor="fecha-regreso"
-                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 text-left"
+                        htmlFor="returnDate"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                       >
-                        Fecha de regreso
+                        Fecha de Regreso (opcional)
                       </label>
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <CalendarIcon className="h-5 w-5 text-gray-400" />
+                          <Calendar className="h-5 w-5 text-gray-400" />
                         </div>
                         <input
                           type="date"
-                          id="fecha-regreso"
-                          className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-primary focus:border-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          id="returnDate"
+                          name="returnDate"
+                          value={searchParams.returnDate}
+                          onChange={handleChange}
+                          className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                         />
                       </div>
                     </div>
 
-                    {/* Número de pasajeros */}
+                    {/* Pasajeros */}
                     <div className="relative">
                       <label
-                        htmlFor="pasajeros"
-                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 text-left"
+                        htmlFor="passengers"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                       >
                         Pasajeros
                       </label>
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <UsersIcon className="h-5 w-5 text-gray-400" />
+                          <Users className="h-5 w-5 text-gray-400" />
                         </div>
                         <select
-                          id="pasajeros"
-                          className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-primary focus:border-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          id="passengers"
+                          name="passengers"
+                          value={searchParams.passengers}
+                          onChange={handleChange}
+                          className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                         >
-                          <option value="1">1 Pasajero</option>
-                          <option value="2">2 Pasajeros</option>
-                          <option value="3">3 Pasajeros</option>
-                          <option value="4">4 Pasajeros</option>
-                          <option value="5">5+ Pasajeros</option>
+                          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                            <option key={num} value={num}>
+                              {num} {num === 1 ? "Pasajero" : "Pasajeros"}
+                            </option>
+                          ))}
                         </select>
                       </div>
                     </div>
-
-                    {/* Botón de búsqueda */}
-                    <div className="relative flex items-end">
-                      <button
-                        type="button"
-                        className="w-full bg-primary hover:bg-primary/80 text-white font-semibold py-2 px-4 rounded-md transition duration-300 ease-in-out flex items-center justify-center"
-                      >
-                        <PlaneIcon className="h-5 w-5 mr-2" />
-                        Buscar vuelos
-                      </button>
-                    </div>
                   </div>
-                </div>
 
-                <div className="flex flex-col items-center justify-center space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
-                  <Link
-                    href="#ofertas"
-                    className="rounded-md bg-primary px-8 py-4 text-base font-semibold text-white duration-300 ease-in-out hover:bg-primary/80"
-                  >
-                    Ver ofertas especiales
-                  </Link>
-                  <Link
-                    href="#destinos"
-                    className="inline-block rounded-md bg-black px-8 py-4 text-base font-semibold text-white duration-300 ease-in-out hover:bg-black/90 dark:bg-white/10 dark:text-white dark:hover:bg-white/5"
-                  >
-                    Explorar destinos
-                  </Link>
-                </div>
+                  <div className="text-center">
+                    <button
+                      type="submit"
+                      className="inline-flex items-center justify-center rounded-md bg-primary py-3 px-10 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
+                    >
+                      Buscar Vuelos
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
           </div>
         </div>
-        <div className="absolute right-0 top-0 z-[-1] opacity-30 lg:opacity-100">
+
+        <div className="absolute top-0 right-0 z-[-1] opacity-30 lg:opacity-100">
           <svg width="450" height="556" viewBox="0 0 450 556" fill="none" xmlns="http://www.w3.org/2000/svg">
             <circle cx="277" cy="63" r="225" fill="url(#paint0_linear_25:217)" />
             <circle cx="17.9997" cy="182" r="18" fill="url(#paint1_radial_25:217)" />
@@ -219,8 +260,8 @@ const Hero = () => {
                 gradientUnits="userSpaceOnUse"
                 gradientTransform="translate(17.9997 182) rotate(90) scale(18)"
               >
-                <stop offset="0.145833" stopColor="#4A6CF7" stopOpacity="0" />
-                <stop offset="1" stopColor="#4A6CF7" stopOpacity="0.08" />
+                <stop stopColor="#4A6CF7" />
+                <stop offset="1" stopColor="#4A6CF7" stopOpacity="0" />
               </radialGradient>
               <radialGradient
                 id="paint2_radial_25:217"
@@ -230,8 +271,8 @@ const Hero = () => {
                 gradientUnits="userSpaceOnUse"
                 gradientTransform="translate(76.9997 288) rotate(90) scale(34)"
               >
-                <stop offset="0.145833" stopColor="#4A6CF7" stopOpacity="0" />
-                <stop offset="1" stopColor="#4A6CF7" stopOpacity="0.08" />
+                <stop stopColor="#4A6CF7" />
+                <stop offset="1" stopColor="#4A6CF7" stopOpacity="0" />
               </radialGradient>
               <linearGradient
                 id="paint3_linear_25:217"
@@ -371,8 +412,8 @@ const Hero = () => {
                 gradientUnits="userSpaceOnUse"
                 gradientTransform="translate(220 63) rotate(90) scale(43)"
               >
-                <stop offset="0.145833" stopColor="white" stopOpacity="0" />
-                <stop offset="1" stopColor="white" stopOpacity="0.08" />
+                <stop stopColor="#4A6CF7" />
+                <stop offset="1" stopColor="#4A6CF7" stopOpacity="0" />
               </radialGradient>
             </defs>
           </svg>

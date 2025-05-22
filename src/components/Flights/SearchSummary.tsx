@@ -8,11 +8,12 @@ const SearchSummary = () => {
 
   // Obtener parámetros de búsqueda (en una implementación real)
   // En este caso usamos valores predeterminados
-  const origen = searchParams.get("origen") || "Ciudad de México"
-  const destino = searchParams.get("destino") || "Cancún"
-  const fechaSalida = searchParams.get("fechaSalida") || "2023-12-15"
-  const fechaRegreso = searchParams.get("fechaRegreso") || "2023-12-22"
-  const pasajeros = searchParams.get("pasajeros") || "2"
+  const origen = searchParams.get("origin") || "Ciudad de México"
+  const destino = searchParams.get("destination") || "Cancún"
+  const fechaSalida = searchParams.get("departureDate") || "2023-12-15"
+  const fechaRegreso = searchParams.get("returnDate") || "2023-12-22"
+  const pasajeros = searchParams.get("passengers") || "2"
+
 
   // Formatear fechas
   const formatDate = (dateString: string) => {

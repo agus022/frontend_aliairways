@@ -42,6 +42,13 @@ const SigninPage = () => {
       setError( 'No se pudo conectar al servidor :(');
     }
   };
+// import { signIn, useSession } from 'next-auth/react';
+
+     
+//      const handleGoogleLogin = () => {
+//         signIn('google', { callbackUrl: '/home' });
+//       };
+
 
   return (
     <>
@@ -56,7 +63,10 @@ const SigninPage = () => {
                 <p className="text-body-color mb-11 text-center text-base font-medium">
                 Accede para un proceso de compra más rápido.
                 </p>
-                <button className="border-stroke dark:text-body-color-dark dark:shadow-two text-body-color hover:border-primary hover:bg-primary/5 hover:text-primary dark:hover:border-primary dark:hover:bg-primary/5 dark:hover:text-primary mb-6 flex w-full items-center justify-center rounded-xs border bg-[#f8f8f8] px-6 py-3 text-base outline-hidden transition-all duration-300 dark:border-transparent dark:bg-[#2C303B] dark:hover:shadow-none">
+                <button 
+                 //onClick={handleGoogleLogin}
+
+                className="border-stroke dark:text-body-color-dark dark:shadow-two text-body-color hover:border-primary hover:bg-primary/5 hover:text-primary dark:hover:border-primary dark:hover:bg-primary/5 dark:hover:text-primary mb-6 flex w-full items-center justify-center rounded-xs border bg-[#f8f8f8] px-6 py-3 text-base outline-hidden transition-all duration-300 dark:border-transparent dark:bg-[#2C303B] dark:hover:shadow-none">
                   <span className="mr-3">
                     <svg
                       width="20"

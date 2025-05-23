@@ -1,16 +1,77 @@
+'use client';
 import Link from "next/link";
 
-import { Metadata } from "next";
 
-export const metadata: Metadata = {
-  title: "Sign In Page | Free Next.js Template for Startup and SaaS",
-  description: "This is Sign In Page for Startup Nextjs Template",
-  // other metadata
-};
+import { useState } from 'react';
+import { signIn, useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+
+
 
 const SigninPage = () => {
+    const router = useRouter();
+  //const { data: session } = useSession();
+
+  const [form, setForm] = useState({
+      email: '',
+      password: '',
+    });
+  
+    const [message, setMessage] = useState('');
+    const [showModal, setShowModal] = useState(false);
+  
+  
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setForm({ ...form, [e.target.name]: e.target.value });
+    };
+  
+    const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      setMessage('');
+  
+      try {
+        const res = await fetch('http://localhost:3000/api/v1/users/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...form }),
+        });
+        //console.log('RESPUESTA:', res);
+        const data = await res.json();
+        //console.log('JSON DATA:', data);
+  
+  
+        if (res.ok) {
+          setForm({ email: '', password: ''});
+          setShowModal(true); // modal
+        } else {
+          setMessage(`${data.message || 'Error al ingresar'}`);
+        }
+      } catch (err) {
+        console.error(err);
+        setMessage('Error al conectar con el servidor');
+      }
+    };
+     
+     const handleGoogleLogin = () => {
+        signIn('google', { callbackUrl: '/home' });
+      };
+
   return (
     <>
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-lg p-6 shadow-lg text-center max-w-sm w-full">
+            <h2 className="text-xl font-semibold mb-4 text-green-600">¡Login exitoso!</h2>
+            <p className="text-gray-700 mb-6">Tu cuenta ha sido creada correctamente.</p>
+            <Link
+              href="/home"
+              className="inline-block bg-primary text-white px-4 py-2 rounded hover:bg-primary/90"
+            >
+              Ir a mi dashbord
+            </Link>
+          </div>
+        </div>
+      )}
       <section className="relative z-10 overflow-hidden pt-36 pb-16 md:pb-20 lg:pt-[180px] lg:pb-28">
         <div className="container">
           <div className="-mx-4 flex flex-wrap">
@@ -22,7 +83,10 @@ const SigninPage = () => {
                 <p className="text-body-color mb-11 text-center text-base font-medium">
                 Accede para un proceso de compra más rápido.
                 </p>
-                <button className="border-stroke dark:text-body-color-dark dark:shadow-two text-body-color hover:border-primary hover:bg-primary/5 hover:text-primary dark:hover:border-primary dark:hover:bg-primary/5 dark:hover:text-primary mb-6 flex w-full items-center justify-center rounded-xs border bg-[#f8f8f8] px-6 py-3 text-base outline-hidden transition-all duration-300 dark:border-transparent dark:bg-[#2C303B] dark:hover:shadow-none">
+                <button 
+                 onClick={handleGoogleLogin}
+
+                className="border-stroke dark:text-body-color-dark dark:shadow-two text-body-color hover:border-primary hover:bg-primary/5 hover:text-primary dark:hover:border-primary dark:hover:bg-primary/5 dark:hover:text-primary mb-6 flex w-full items-center justify-center rounded-xs border bg-[#f8f8f8] px-6 py-3 text-base outline-hidden transition-all duration-300 dark:border-transparent dark:bg-[#2C303B] dark:hover:shadow-none">
                   <span className="mr-3">
                     <svg
                       width="20"
@@ -66,7 +130,7 @@ const SigninPage = () => {
                   </p>
                   <span className="bg-body-color/50 hidden h-[1px] w-full max-w-[70px] sm:block"></span>
                 </div>
-                <form>
+                <form onSubmit={handleSubmit}>
                   <div className="mb-8">
                     <label
                       htmlFor="email"
@@ -78,6 +142,8 @@ const SigninPage = () => {
                       type="email"
                       name="email"
                       placeholder="Ingresa tu correo electrónico"
+                      onChange={handleChange}
+                      value={form.email}
                       className="border-stroke dark:text-body-color-dark dark:shadow-two text-body-color focus:border-primary dark:focus:border-primary w-full rounded-xs border bg-[#f8f8f8] px-6 py-3 text-base outline-hidden transition-all duration-300 dark:border-transparent dark:bg-[#2C303B] dark:focus:shadow-none"
                     />
                   </div>
@@ -92,6 +158,8 @@ const SigninPage = () => {
                       type="password"
                       name="password"
                       placeholder="Ingresa tu contraseña"
+                       onChange={handleChange}
+                      value={form.password}
                       className="border-stroke dark:text-body-color-dark dark:shadow-two text-body-color focus:border-primary dark:focus:border-primary w-full rounded-xs border bg-[#f8f8f8] px-6 py-3 text-base outline-hidden transition-all duration-300 dark:border-transparent dark:bg-[#2C303B] dark:focus:shadow-none"
                     />
                   </div>

@@ -1,10 +1,10 @@
-// src/pages/api/auth/[...nextauth].ts
+// src/app/api/auth/[...nextauth]/route.ts
 
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
 
-export default NextAuth({
+const handler = NextAuth({
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -13,13 +13,11 @@ export default NextAuth({
         password: { label: 'Contraseña', type: 'password' },
       },
       async authorize(credentials) {
-        // Lógica para verificar las credenciales del usuario
-        // Por ejemplo, realizar una solicitud a tu API para autenticar al usuario
         const res = await fetch('http://localhost:3000/api/v1/users/login', {
           method: 'POST',
           body: JSON.stringify({
-            email: credentials.email,
-            password: credentials.password,
+            email: credentials?.email,
+            password: credentials?.password,
           }),
           headers: { 'Content-Type': 'application/json' },
         });
@@ -28,15 +26,15 @@ export default NextAuth({
 
         if (res.ok && user) {
           return user;
-        } else {
-          return null;
         }
+        return null;
       },
     }),
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
   ],
-  // Otras configuraciones opcionales
 });
+
+export { handler as GET, handler as POST };

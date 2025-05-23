@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { signIn, useSession } from 'next-auth/react';
+
 
 const SigninPage = () => {
   const [form, setForm] = useState({
@@ -12,6 +14,7 @@ const SigninPage = () => {
 
 
   const [error, setError] = useState('');
+  const { data: session } = useSession();
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,31 +26,33 @@ const SigninPage = () => {
     setError('');
 
     try {
-      const res = await fetch('http://localhost:3000/api/v1/users/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+      const result = await signIn('credentials', {
+        redirect: false,
+        email: form.email,
+        password: form.password,
       });
 
-      const data = await res.json();
-
-      if (res.ok) {
-        localStorage.setItem('token', data.token);
-        router.push('/');
-      } else {
-        setError(data.message || 'Error al iniciar sesión :(');
+      if (result?.error) {
+        setError(result.error);
       }
     } catch (err) {
       console.error(err);
       setError( 'No se pudo conectar al servidor :(');
     }
   };
-// import { signIn, useSession } from 'next-auth/react';
 
-     
-//      const handleGoogleLogin = () => {
-//         signIn('google', { callbackUrl: '/home' });
-//       };
+  useEffect(() => {
+  if (session?.user?.role) {
+    if (session.user.role === 'administrator') {
+      router.push('/views/admin');
+    } else if (session.user.role === 'employee') {
+      router.push('/employee/dashboard');
+    } else if (session.user.role === 'passenger') {
+      router.push('/passenger/home');
+    }
+  }
+}, [session]);
+
 
 
   return (
@@ -64,8 +69,7 @@ const SigninPage = () => {
                 Accede para un proceso de compra más rápido.
                 </p>
                 <button 
-                 //onClick={handleGoogleLogin}
-
+                 onClick={() => signIn('google', { callbackUrl: '/' })}
                 className="border-stroke dark:text-body-color-dark dark:shadow-two text-body-color hover:border-primary hover:bg-primary/5 hover:text-primary dark:hover:border-primary dark:hover:bg-primary/5 dark:hover:text-primary mb-6 flex w-full items-center justify-center rounded-xs border bg-[#f8f8f8] px-6 py-3 text-base outline-hidden transition-all duration-300 dark:border-transparent dark:bg-[#2C303B] dark:hover:shadow-none">
                   <span className="mr-3">
                     <svg

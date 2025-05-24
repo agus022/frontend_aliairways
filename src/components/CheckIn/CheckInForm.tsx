@@ -1,11 +1,16 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { Search } from "lucide-react"
+import FlightConfirmation from "./FlightConfirmation"
+import SeatSelection from "./SeatSelection"
+import BoardingPass from "./BoardingPass"
+
+type CheckInStep = "search" | "confirm" | "seat" | "boarding"
 
 export default function CheckInForm() {
+  const [currentStep, setCurrentStep] = useState<CheckInStep>("search")
   const [searchType, setSearchType] = useState<"reservation" | "passenger">("reservation")
   const [formData, setFormData] = useState({
     reservationNumber: "",
@@ -13,11 +18,37 @@ export default function CheckInForm() {
     firstName: "",
     email: "",
   })
+  const [selectedSeat, setSelectedSeat] = useState<string | null>(null)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Aquí iría la lógica de búsqueda
-    console.log("Buscando check-in con:", formData)
+    // Simular búsqueda exitosa
+    setCurrentStep("confirm")
+  }
+
+  const handleConfirmFlight = () => {
+    setCurrentStep("seat")
+  }
+
+  const handleSeatSelection = (seat: string) => {
+    setSelectedSeat(seat)
+    setCurrentStep("boarding")
+  }
+
+  const handleBackToSearch = () => {
+    setCurrentStep("search")
+  }
+
+  if (currentStep === "confirm") {
+    return <FlightConfirmation onConfirm={handleConfirmFlight} onBack={handleBackToSearch} />
+  }
+
+  if (currentStep === "seat") {
+    return <SeatSelection onSeatSelect={handleSeatSelection} onBack={() => setCurrentStep("confirm")} />
+  }
+
+  if (currentStep === "boarding") {
+    return <BoardingPass selectedSeat={selectedSeat} onBack={() => setCurrentStep("seat")} />
   }
 
   return (

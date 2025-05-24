@@ -1,34 +1,38 @@
 import { CheckCircle, Clock, Plane, CreditCard } from "lucide-react"
 
-export default function CheckInSteps() {
+interface CheckInStepsProps {
+  currentStep?: number
+}
+
+export default function CheckInSteps({ currentStep = 1 }: CheckInStepsProps) {
   const steps = [
     {
       icon: <CreditCard className="w-6 h-6" />,
       title: "Ingresa tus datos",
       description: "Número de reservación o datos del pasajero",
-      completed: false,
-      current: true,
+      completed: currentStep > 1,
+      current: currentStep === 1,
     },
     {
       icon: <Clock className="w-6 h-6" />,
       title: "Confirma tu vuelo",
       description: "Verifica los detalles de tu reservación",
-      completed: false,
-      current: false,
+      completed: currentStep > 2,
+      current: currentStep === 2,
     },
     {
       icon: <Plane className="w-6 h-6" />,
       title: "Selecciona asiento",
       description: "Elige tu asiento preferido",
-      completed: false,
-      current: false,
+      completed: currentStep > 3,
+      current: currentStep === 3,
     },
     {
       icon: <CheckCircle className="w-6 h-6" />,
       title: "Obtén tu pase",
       description: "Descarga tu pase de abordar",
-      completed: false,
-      current: false,
+      completed: currentStep > 4,
+      current: currentStep === 4,
     },
   ]
 
@@ -38,7 +42,7 @@ export default function CheckInSteps() {
 
       <div className="flex flex-col md:flex-row justify-between">
         {steps.map((step, index) => (
-          <div key={index} className="flex flex-col items-center text-center mb-6 md:mb-0">
+          <div key={index} className="flex flex-col items-center text-center mb-6 md:mb-0 relative">
             <div
               className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 ${
                 step.completed
@@ -58,7 +62,11 @@ export default function CheckInSteps() {
             <p className="text-sm text-gray-600 dark:text-gray-300 max-w-32">{step.description}</p>
 
             {index < steps.length - 1 && (
-              <div className="hidden md:block w-16 h-0.5 bg-gray-300 dark:bg-gray-600 mt-6 absolute translate-x-20" />
+              <div
+                className={`hidden md:block w-16 h-0.5 mt-6 absolute translate-x-20 ${
+                  step.completed ? "bg-green-500" : "bg-gray-300 dark:bg-gray-600"
+                }`}
+              />
             )}
           </div>
         ))}

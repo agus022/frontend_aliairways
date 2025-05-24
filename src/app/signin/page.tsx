@@ -46,7 +46,7 @@ const SigninPage = () => {
     if (session.user.role === 'administrator') {
       router.push('/views/admin');
     } else if (session.user.role === 'employee') {
-      router.push('/employee/dashboard');
+      router.push('/views/employee');
     } else if (session.user.role === 'passenger') {
       router.push('/passenger/home');
     }

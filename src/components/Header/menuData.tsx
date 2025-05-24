@@ -1,4 +1,4 @@
-import { Menu } from "@/types/menu";
+import type { Menu } from "@/types/menu"
 
 const menuData: Menu[] = [
   {
@@ -13,14 +13,37 @@ const menuData: Menu[] = [
     path: "/about",
     newTab: false,
   },
-  /*
   {
-    id: 33,
-    title: "Blog",
-    path: "/blog",
+    id: 5,
+    title: "Mi Cuenta",
     newTab: false,
+    submenu: [
+      {
+        id: 51,
+        title: "Mis Reservaciones",
+        path: "/mis-reservaciones",
+        newTab: false,
+      },
+      {
+        id: 52,
+        title: "Check-in Online",
+        path: "/check-in",
+        newTab: false,
+      },
+      {
+        id: 53,
+        title: "Mi Perfil",
+        path: "/perfil",
+        newTab: false,
+      },
+      {
+        id: 54,
+        title: "Historial de Vuelos",
+        path: "/historial-vuelos",
+        newTab: false,
+      },
+    ],
   },
-  */
   {
     id: 3,
     title: "Support",
@@ -44,27 +67,6 @@ const menuData: Menu[] = [
         path: "/contact",
         newTab: false,
       },
-      /*
-      {
-        id: 43,
-        title: "Blog Grid Page",
-        path: "/blog",
-        newTab: false,
-      },
-      {
-        id: 44,
-        title: "Blog Sidebar Page",
-        path: "/blog-sidebar",
-        newTab: false,
-      },
-      
-      {
-        id: 45,
-        title: "Blog Details Page",
-        path: "/blog-details",
-        newTab: false,
-      },
-      */
       {
         id: 46,
         title: "Sign In Page",
@@ -85,5 +87,5 @@ const menuData: Menu[] = [
       },
     ],
   },
-];
-export default menuData;
+]
+export default menuData

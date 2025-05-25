@@ -6,54 +6,88 @@ import { Save, Edit, Camera, User } from "lucide-react"
 
 export default function PersonalInfo() {
   const { data: session, status } = useSession()
-  //console.log(session.user);
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState({
     firstName: "",
     lastNamePaternal: "",
-    lastNameMaternal:"",
+    lastNameMaternal: "",
     email: "",
     phone: "",
     dateOfBirth: "",
     passportNumber: "",
   })
 
+  const [userMeta, setUserMeta] = useState({
+    passengerId: null,
+    accumulatedFlights: 0,
+    frequentFlyer: false,
+    userId: null,
+  })
+
   useEffect(() => {
     const fetchUserData = async () => {
-        if (session?.user?.userId && session?.accessToken) {
-          try {
-            const res = await fetch(`http://localhost:3000/api/v1/users/profile/${session.user.userId}`, {
-              headers: {
-                Authorization: `Bearer ${session.accessToken}`, // ← Aquí se envía el token
-              },
-            })
-            const data = await res.json()
-            const user = data[0]
-            console.log(user)
-            setFormData({
-              firstName: user.first_name || "",
-              lastNamePaternal: (user.last_name_paternal || ""),
-              lastNameMaternal: (user.last_name_maternal || ""),
-              email: user.passenger_email || "",
-              phone: user.passenger_phone || "",
-              dateOfBirth: user.birth_date?.split("T")[0] || "",
-              passportNumber: user.passport || "",
-            })
-          } catch (err) {
-            console.error("Error al obtener datos del usuario:", err)
-          }
-        }else{
-          console.log("No existen estos datos");
+      if (session?.user?.userId && session?.accessToken) {
+        try {
+          const res = await fetch(`http://localhost:3000/api/v1/users/profile/${session.user.userId}`, {
+            headers: {
+              Authorization: `Bearer ${session.accessToken}`,
+            },
+          })
+          const data = await res.json()
+          const user = data[0]
+          setFormData({
+            firstName: user.first_name || "",
+            lastNamePaternal: user.last_name_paternal || "",
+            lastNameMaternal: user.last_name_maternal || "",
+            email: user.passenger_email || user.user_email || "",
+            phone: user.passenger_phone || user.user_phone || "",
+            dateOfBirth: user.birth_date?.split("T")[0] || "",
+            passportNumber: user.passport || "",
+          })
+          setUserMeta({
+            passengerId: user.passenger_id,
+            accumulatedFlights: user.accumulated_flights || 0,
+            frequentFlyer: user.frequent_flyer || false,
+            userId: user.user_id,
+          })
+        } catch (err) {
+          console.error("Error al obtener datos del usuario:", err)
         }
       }
+    }
     fetchUserData()
-  }, [session,status])
+  }, [session, status])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsEditing(false)
-    console.log("Guardando datos:", formData)
-    // Aquí podrías hacer un POST/PUT a tu API
+
+    try {
+      const res = await fetch(`http://localhost:3000/api/v1/passengers/${userMeta.passengerId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.accessToken}`,
+        },
+        body: JSON.stringify({
+          first_name: formData.firstName,
+          last_name_maternal: formData.lastNameMaternal,
+          last_name_paternal: formData.lastNamePaternal,
+          birth_date: formData.dateOfBirth,
+          passport: formData.passportNumber,
+          phone: formData.phone,
+          email: formData.email,
+          accumulated_flights: userMeta.accumulatedFlights,
+          frecuent_flyer: userMeta.frequentFlyer,
+          user_id: userMeta.userId,
+        }),
+      })
+
+      if (!res.ok) throw new Error("Error al actualizar el perfil")
+      console.log("Perfil actualizado correctamente")
+    } catch (err) {
+      console.error("Error en el PUT:", err)
+    }
   }
 
   return (

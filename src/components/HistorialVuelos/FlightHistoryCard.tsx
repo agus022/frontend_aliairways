@@ -1,19 +1,21 @@
 import { Calendar, Clock, MapPin, Download, CreditCard } from "lucide-react"
 
+interface Flight {
+  id: number;
+  flightNumber: number;
+  route: string;
+  date: string;
+  time: string;
+  status: string;
+  totalPaid: number;
+  bookingReference: number;
+  aircraft: string;
+  duration: string;
+  miles: number;
+}
+
 interface FlightHistoryCardProps {
-  flight: {
-    id: string
-    flightNumber: string
-    route: string
-    date: string
-    time: string
-    status: "completed" | "cancelled"
-    totalPaid: number
-    bookingReference: string
-    aircraft: string
-    duration: string
-    miles: number
-  }
+  flight: Flight;
 }
 
 export default function FlightHistoryCard({ flight }: FlightHistoryCardProps) {

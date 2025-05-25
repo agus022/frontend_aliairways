@@ -2,6 +2,7 @@ import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
 import jwt from 'jsonwebtoken';
+import { UserRoundIcon } from 'lucide-react';
 
 const handler = NextAuth({
   providers: [
@@ -48,12 +49,14 @@ const handler = NextAuth({
       if (user) {
         token.role = user.role;
         token.username = user.name;
+        token.userId=user.id;
         token.accessToken = user.token;
       }
       return token;
     },
     async session({ session, token }) {
   session.user.role = token.role;
+  session.user.userId=token.userId;
   session.user.username = token.username;
   session.accessToken = token.accessToken;
   return session;

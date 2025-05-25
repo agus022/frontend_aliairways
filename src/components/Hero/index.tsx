@@ -1,7 +1,10 @@
 "use client"
+// pages/_app.tsx
+
+
 
 import type React from "react"
-
+import 'select2/dist/css/select2.min.css';
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Search, Calendar, Users } from "lucide-react"
@@ -24,6 +27,13 @@ const Hero = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
+
+     const { departureDate, returnDate } = searchParams
+
+    if (returnDate && returnDate < departureDate) {
+      alert("La fecha de regreso no puede ser anterior a la de salida.")
+      return
+    }
     // Construir query string para la URL
     const queryParams = new URLSearchParams()
     Object.entries(searchParams).forEach(([key, value]) => {

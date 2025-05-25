@@ -10,7 +10,8 @@ export default function PersonalInfo() {
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState({
     firstName: "",
-    lastName: "",
+    lastNamePaternal: "",
+    lastNameMaternal:"",
     email: "",
     phone: "",
     dateOfBirth: "",
@@ -31,7 +32,8 @@ export default function PersonalInfo() {
             console.log(user)
             setFormData({
               firstName: user.first_name || "",
-              lastName: (user.last_name_paternal || "") + " " + (user.last_name_maternal || ""),
+              lastNamePaternal: (user.last_name_paternal || ""),
+              lastNameMaternal: (user.last_name_maternal || ""),
               email: user.passenger_email || "",
               phone: user.passenger_phone || "",
               dateOfBirth: user.birth_date?.split("T")[0] || "",
@@ -82,7 +84,7 @@ export default function PersonalInfo() {
         </div>
         <div>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-            {formData.firstName} {formData.lastName}
+            {formData.firstName} {formData.lastNamePaternal+" "+formData.lastNameMaternal}
           </h3>
           <p className="text-gray-600 dark:text-gray-300">Miembro desde enero 2024</p>
         </div>
@@ -105,8 +107,18 @@ export default function PersonalInfo() {
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Apellidos</label>
             <input
               type="text"
-              value={formData.lastName}
-              onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+              value={formData.lastNamePaternal}
+              onChange={(e) => setFormData({ ...formData, lastNamePaternal: e.target.value })}
+              disabled={!isEditing}
+              className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary disabled:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:disabled:bg-gray-800"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Apellidos</label>
+            <input
+              type="text"
+              value={formData.lastNameMaternal}
+              onChange={(e) => setFormData({ ...formData, lastNameMaternal: e.target.value })}
               disabled={!isEditing}
               className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary disabled:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:disabled:bg-gray-800"
             />

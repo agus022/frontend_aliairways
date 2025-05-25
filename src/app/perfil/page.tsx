@@ -16,7 +16,7 @@ export default function PerfilPage() {
   
       // Redirige si no hay sesión o si no es administrador
       if (!session || session.user.role !== 'passenger') {
-        router.push('/signin');
+        router.push('/singin');
       }
     }, [session, status, router]);
   

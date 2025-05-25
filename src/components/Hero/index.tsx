@@ -4,7 +4,6 @@
 
 
 import type React from "react"
-import 'select2/dist/css/select2.min.css';
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Search, Calendar, Users } from "lucide-react"

@@ -1,14 +1,76 @@
 "use client"
 
 import { Plane, Clock, MapPin, Users, ArrowLeft, ArrowRight } from "lucide-react"
+import { useEffect, useState } from "react"
+interface flight{
+  reservation_id:number,
+  flight_id:number,
+  model:string,
+  departure_time:string,
+  arrival_time:string,
+  origin_id:string,
+  destination_id:string,
+  departure_date:string,
+  seat:string,
+  class:string,
+  full_name:string,
+  email:string,
+  phone:string,
+  estado:string|null
+}
 
 interface FlightConfirmationProps {
   onConfirm: () => void
   onBack: () => void
+  CheckData: flight // Idealmente, define bien el tipo
 }
 
-export default function FlightConfirmation({ onConfirm, onBack }: FlightConfirmationProps) {
+export default function FlightConfirmation({ onConfirm, onBack,  CheckData }: FlightConfirmationProps) {
   // Mock flight data
+  const [origin,setOrigin]=useState<any>(null);
+  const [destination,setDestintion]=useState<any>(null);
+  
+
+  function getTimeDifference(departureTime: string, arrivalTime: string): { hours: number, minutes: number } {
+    const [depHour, depMin] = departureTime.split(":").map(Number)
+    const [arrHour, arrMin] = arrivalTime.split(":").map(Number)
+
+    const depDate = new Date(0, 0, 0, depHour, depMin)
+    let arrDate = new Date(0, 0, 0, arrHour, arrMin)
+
+    // Si la hora de llegada es menor, asumimos que es el día siguiente
+    if (arrDate <= depDate) {
+      arrDate.setDate(arrDate.getDate() + 1)
+    }
+
+    const diffMs = arrDate.getTime() - depDate.getTime()
+    const diffMin = Math.floor(diffMs / 1000 / 60)
+    const hours = Math.floor(diffMin / 60)
+    const minutes = diffMin % 60
+
+    return { hours, minutes }
+  }
+  console.log(CheckData);
+
+  useEffect(()=>{
+    const fetchAllData= async ()=>{
+      try{
+       const res= await fetch(`http://localhost:3000/api/v1/airports/${CheckData.origin_id}`)
+       const originData=await res.json();
+       setOrigin(originData);
+
+       const resDes=await fetch(`http://localhost:3000/api/v1/airports/${CheckData.destination_id}`)
+       const destinationData=await resDes.json();
+       setDestintion(destinationData);
+      }catch(error){
+        console.log("Error al cargar los datos:",error);
+      }
+    }
+    fetchAllData();
+  })
+  
+  console.log("ORIGIN",origin);
+  console.log("dESTINAION",destination);
   const flightData = {
     reservationNumber: "ALI-789456",
     passenger: {
@@ -48,6 +110,7 @@ export default function FlightConfirmation({ onConfirm, onBack }: FlightConfirma
       checked: "1 pieza (23kg)",
     },
   }
+  const duration = getTimeDifference(CheckData.departure_time, CheckData.arrival_time)
 
   return (
     <div className="space-y-6">
@@ -69,8 +132,8 @@ export default function FlightConfirmation({ onConfirm, onBack }: FlightConfirma
         <div className="flex items-center gap-3 mb-6">
           <Plane className="w-6 h-6 text-primary" />
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Vuelo {flightData.flight.number}</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-300">{flightData.flight.aircraft}</p>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Vuelo {CheckData.flight_id}</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300">{CheckData.model}</p>
           </div>
         </div>
 
@@ -78,16 +141,15 @@ export default function FlightConfirmation({ onConfirm, onBack }: FlightConfirma
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           {/* Departure */}
           <div className="text-center md:text-left">
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">{flightData.flight.departure.time}</div>
-            <div className="text-lg font-semibold text-gray-700 dark:text-gray-300">{flightData.flight.from.code}</div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">{flightData.flight.from.city}</div>
-            <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">{flightData.flight.from.airport}</div>
-            <div className="text-xs text-gray-500 dark:text-gray-500">{flightData.flight.from.terminal}</div>
+            <div className="text-2xl font-bold text-gray-900 dark:text-white">{CheckData.departure_date}</div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">{origin?.city ?? "Cargando..."}</div>
+            <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">{origin?.name ?? "Cargando..."}</div>
+            <div className="text-xs text-gray-500 dark:text-gray-500">{origin?.code ?? ""}</div>
           </div>
 
           {/* Duration */}
           <div className="flex flex-col items-center justify-center">
-            <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">{flightData.flight.duration}</div>
+            <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">{duration.hours}h {duration.minutes}m</div>
             <div className="w-full h-0.5 bg-gray-300 dark:bg-gray-600 relative">
               <Plane className="w-4 h-4 text-primary absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-gray-800" />
             </div>
@@ -96,11 +158,10 @@ export default function FlightConfirmation({ onConfirm, onBack }: FlightConfirma
 
           {/* Arrival */}
           <div className="text-center md:text-right">
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">{flightData.flight.arrival.time}</div>
-            <div className="text-lg font-semibold text-gray-700 dark:text-gray-300">{flightData.flight.to.code}</div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">{flightData.flight.to.city}</div>
-            <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">{flightData.flight.to.airport}</div>
-            <div className="text-xs text-gray-500 dark:text-gray-500">{flightData.flight.to.terminal}</div>
+            <div className="text-2xl font-bold text-gray-900 dark:text-white">{CheckData.arrival_time}</div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">{destination?.city ?? "Cargando..."}</div>
+            <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">{destination?.name ?? "Cargando..."}</div>
+            <div className="text-xs text-gray-500 dark:text-gray-500">{destination?.code ?? ""}</div>
           </div>
         </div>
 
@@ -109,21 +170,16 @@ export default function FlightConfirmation({ onConfirm, onBack }: FlightConfirma
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-gray-500" />
             <span className="text-sm text-gray-600 dark:text-gray-400">
-              {new Date(flightData.flight.departure.date).toLocaleDateString("es-ES", {
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
+              {CheckData.departure_date}
             </span>
           </div>
           <div className="flex items-center gap-2">
             <Users className="w-4 h-4 text-gray-500" />
-            <span className="text-sm text-gray-600 dark:text-gray-400">Clase {flightData.flight.class}</span>
+            <span className="text-sm text-gray-600 dark:text-gray-400">Clase {CheckData.class}</span>
           </div>
           <div className="flex items-center gap-2">
             <MapPin className="w-4 h-4 text-gray-500" />
-            <span className="text-sm text-gray-600 dark:text-gray-400">Asiento: {flightData.flight.seat}</span>
+            <span className="text-sm text-gray-600 dark:text-gray-400">Asiento: {CheckData.seat}</span>
           </div>
         </div>
       </div>
@@ -134,19 +190,19 @@ export default function FlightConfirmation({ onConfirm, onBack }: FlightConfirma
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Nombre completo</label>
-            <p className="text-gray-900 dark:text-white">{flightData.passenger.name}</p>
+            <p className="text-gray-900 dark:text-white">{CheckData.full_name}</p>
           </div>
           <div>
             <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Número de reservación</label>
-            <p className="text-gray-900 dark:text-white font-mono">{flightData.reservationNumber}</p>
+            <p className="text-gray-900 dark:text-white font-mono">{"ALI"+CheckData.reservation_id}</p>
           </div>
           <div>
             <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Correo electrónico</label>
-            <p className="text-gray-900 dark:text-white">{flightData.passenger.email}</p>
+            <p className="text-gray-900 dark:text-white">{CheckData.email}</p>
           </div>
           <div>
             <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Teléfono</label>
-            <p className="text-gray-900 dark:text-white">{flightData.passenger.phone}</p>
+            <p className="text-gray-900 dark:text-white">{CheckData.phone}</p>
           </div>
         </div>
       </div>

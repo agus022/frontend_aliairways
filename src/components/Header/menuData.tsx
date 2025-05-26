@@ -1,91 +1,47 @@
+'use client'
 import type { Menu } from "@/types/menu"
 
-const menuData: Menu[] = [
-  {
-    id: 1,
-    title: "Home",
-    path: "/",
-    newTab: false,
-  },
-  {
-    id: 2,
-    title: "About",
-    path: "/about",
-    newTab: false,
-  },
-  {
-    id: 5,
-    title: "Mi Cuenta",
-    newTab: false,
-    submenu: [
-      {
-        id: 51,
-        title: "Mis Reservaciones",
-        path: "/mis-reservaciones",
-        newTab: false,
-      },
-      {
-        id: 52,
-        title: "Check-in Online",
-        path: "/check-in",
-        newTab: false,
-      },
-      {
-        id: 53,
-        title: "Mi Perfil",
-        path: "/perfil",
-        newTab: false,
-      },
-      {
-        id: 54,
-        title: "Historial de Vuelos",
-        path: "/historial-vuelos",
-        newTab: false,
-      },
-    ],
-  },
-  {
-    id: 3,
-    title: "Support",
-    path: "/contact",
-    newTab: false,
-  },
-  {
-    id: 4,
-    title: "Pages",
-    newTab: false,
-    submenu: [
-      {
-        id: 41,
-        title: "About Page",
-        path: "/about",
-        newTab: false,
-      },
-      {
-        id: 42,
-        title: "Contact Page",
-        path: "/contact",
-        newTab: false,
-      },
-      {
-        id: 46,
-        title: "Sign In Page",
-        path: "/signin",
-        newTab: false,
-      },
-      {
-        id: 47,
-        title: "Sign Up Page",
-        path: "/signup",
-        newTab: false,
-      },
-      {
-        id: 48,
-        title: "Error Page",
-        path: "/error",
-        newTab: false,
-      },
-    ],
-  },
-]
-export default menuData
+
+export const menusByRole: Record<string, Menu[]> = {
+  passenger: [
+    { id: 1, title: "Home", path: "/", newTab: false },
+    { id: 2, title: "About", path: "/about", newTab: false },
+    {
+      id: 5,
+      title: "Mi Cuenta",
+      newTab: false,
+      submenu: [
+        { id: 51, title: "Mis Reservaciones", path: "/mis-reservaciones", newTab: false },
+        { id: 52, title: "Check-in Online", path: "/check-in", newTab: false },
+        { id: 53, title: "Mi Perfil", path: "/perfil", newTab: false },
+        { id: 54, title: "Historial de Vuelos", path: "/historial-vuelos", newTab: false },
+      ],
+    },
+    { id: 3, title: "Support", path: "/contact", newTab: false },
+  ],
+
+  administrator: [
+    { id: 1, title: "Dashboard", path: "/views/admin", newTab: false },
+    { id: 2, title: "Empleados", path: "/admin/employees", newTab: false },
+    { id: 3, title: "Trabajos", path: "/admin/jobs", newTab: false },
+    {
+      id: 4,
+      title: "Empresa",
+      newTab: false,
+      submenu: [
+        { id: 41, title: "Vuelos", path: "/admin/flights", newTab: false },
+        { id: 42, title: "Aeropuertos", path: "/admin/airports", newTab: false },
+        { id: 43, title: "Aeronaves", path: "/admin/aircrafts", newTab: false },
+      ],
+    },
+    { id: 5, title: "Reservaciones", path: "/admin/reservations", newTab: false },
+    { id: 6, title: "Equipaje", path: "/admin/baggage", newTab: false },
+  ],
+
+  employee: [
+    { id: 1, title: "Panel de Trabajo", path: "/employee/", newTab: false },
+    { id: 2, title: "Mis Vuelos", path: "/employee/", newTab: false },
+  ]
+};
+
+export default menusByRole;

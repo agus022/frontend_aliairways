@@ -22,10 +22,8 @@ const AdminDashboardPage = () => {
   }
 
   return (
-    <section className="p-8">
-      <h1 className="text-3xl font-bold text-gray-800 mb-4">Panel de Administrador</h1>
+    <section className="mt-24 p-8">
       <p className="text-gray-600 mb-8">Bienvenido, {session?.user.name || session?.user.username}</p>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="p-6 border rounded shadow-sm bg-white">
           <h2 className="text-xl font-semibold mb-2">Gestión de usuarios</h2>

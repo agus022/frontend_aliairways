@@ -4,7 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import ThemeToggler from "../Header/ThemeToggler";
-import menuData from "../Header/menuData";
+import { useSession ,signOut } from "next-auth/react";
+import { menusByRole } from "../Header/menuData";
+import { FaUserCircle } from "react-icons/fa";
+
+
 
 const Header = () => {
   // Navbar toggle
@@ -36,6 +40,14 @@ const Header = () => {
   };
 
   const usePathName = usePathname();
+  const { data: session } = useSession();
+  const user = session?.user;
+  const role = session?.user?.role || "passenger";
+  const menuData = menusByRole[role] || menusByRole["passenger"];
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  
+  //timeover para hover 
+  let hoverTimeout: NodeJS.Timeout;
 
   return (
     <>
@@ -158,18 +170,55 @@ const Header = () => {
                 </nav>
               </div>
               <div className="flex items-center justify-end pr-16 lg:pr-0">
-                <Link
-                  href="/signin"
-                  className="text-dark hidden px-7 py-3 text-base font-medium hover:opacity-70 md:block dark:text-white"
-                >
-                  Sign In
-                </Link>
-                <Link
-                  href="/signup"
-                  className="ease-in-up shadow-btn hover:shadow-btn-hover bg-primary hover:bg-primary/90 hidden rounded-xs px-8 py-3 text-base font-medium text-white transition duration-300 md:block md:px-9 lg:px-6 xl:px-9"
-                >
-                  Sign Up
-                </Link>
+                {user ? (
+                  <div
+                    className="relative"
+                    onMouseEnter={() => {
+                      clearTimeout(hoverTimeout);
+                      setDropdownOpen(true);
+                    }}
+                    onMouseLeave={() => {
+                      hoverTimeout = setTimeout(() => setDropdownOpen(false), 200); // 300ms delay
+                    }}
+                  >
+                    <button className="flex items-center gap-2 text-gray-600 font-bold hover:text-primary dark:text-white">
+                      <FaUserCircle className="text-2xl" />
+                      <span>{user.name}</span>
+                    </button>
+
+                    {dropdownOpen && (
+                      <div
+                        className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 shadow-lg rounded-md border dark:border-gray-700 z-50 p-4"
+                      >
+                        <p className="text-sm text-gray-800 dark:text-white mb-2">
+                          <strong>Correo:</strong><br /> {user.email}
+                        </p>
+                        <hr className="my-2 border-gray-300 dark:border-gray-600" />
+                        <button
+                          onClick={() => signOut()}
+                          className="w-full text-left text-red-600 hover:text-red-800 font-medium"
+                        >
+                          Cerrar Sesión
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <>
+                    <Link
+                      href="/signin"
+                      className="text-dark hidden px-7 py-3 text-base font-medium hover:opacity-70 md:block dark:text-white"
+                    >
+                      Sign In
+                    </Link>
+                    <Link
+                      href="/signup"
+                      className="ease-in-up shadow-btn hover:shadow-btn-hover bg-primary hover:bg-primary/90 hidden rounded-xs px-8 py-3 text-base font-medium text-white transition duration-300 md:block md:px-9 lg:px-6 xl:px-9"
+                    >
+                      Sign Up
+                    </Link>
+                  </>
+                )}
                 <div>
                   <ThemeToggler />
                 </div>
@@ -182,4 +231,4 @@ const Header = () => {
   );
 };
 
-export default Header;
+export default Header;

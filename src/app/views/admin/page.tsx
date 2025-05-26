@@ -7,7 +7,8 @@ const FlightPerformanceSection = () => {
   const [filter, setFilter] = useState<'day' | 'week' | 'month'>('day');
 
   return (
- <section className="mt-10">
+<section className="mt-10">
+      {/* Encabezado y filtro */}
       <div className="flex items-center justify-between mb-4 px-2">
         <h2 className="text-2xl font-bold text-gray-800">Rendimiento de Vuelos</h2>
         <div className="flex space-x-2">
@@ -27,8 +28,10 @@ const FlightPerformanceSection = () => {
         </div>
       </div>
 
+      {/* Tarjetas principales */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded shadow col-span-1 flex flex-col justify-between">
+        {/* Vuelos Totales */}
+        <div className="bg-white p-6 rounded shadow flex flex-col justify-between">
           <div className="mb-8">
             <h3 className="text-gray-500 text-sm mb-1">Vuelos Totales ({filter})</h3>
             <p className="text-4xl font-bold text-gray-900">
@@ -68,25 +71,78 @@ const FlightPerformanceSection = () => {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded shadow col-span-1">
-          <h3 className="text-lg font-semibold text-gray-700 mb-4">
-            Vuelos por {filter === 'day' ? 'Hora' : filter === 'week' ? 'Día' : 'Semana'}
-          </h3>
-          <div className="h-48 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-sm">
-            [ Gráfica de barras ]
+        {/* Vuelos en Curso */}
+        <div className="bg-white p-6 rounded shadow">
+          <h3 className="text-lg font-semibold text-gray-700 mb-4">Vuelos en Curso</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-gray-100 p-4 rounded text-center">
+              <p className="text-sm text-gray-600 mb-1">Llegadas</p>
+              <p className="text-3xl font-bold text-blue-600">68</p>
+            </div>
+            <div className="bg-gray-100 p-4 rounded text-center">
+              <p className="text-sm text-gray-600 mb-1">Salidas</p>
+              <p className="text-3xl font-bold text-blue-600">74</p>
+            </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded shadow col-span-1">
-          <h3 className="text-lg font-semibold text-gray-700 mb-4">Distribución de Vuelos</h3>
-          <div className="h-48 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-sm">
-            [ Gráfica comparativa ]
+        {/* Vuelos Programados */}
+        <div className="bg-white p-6 rounded shadow flex flex-col justify-between">
+          <div>
+            <h3 className="text-gray-500 text-sm mb-1">Vuelos Programados</h3>
+            <p className="text-4xl font-bold text-gray-900">
+              {filter === 'day' ? '390' : filter === 'week' ? '2,600' : '10,100'}
+            </p>
+            <p className="text-gray-600 text-sm mt-2">
+              Incluye vuelos próximos a operar en el periodo seleccionado.
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Nueva sección: Información Financiera */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-10">
+      {/* Gráficas extendidas */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <div className="bg-white p-6 rounded shadow ">
+          <h3 className="text-lg font-semibold text-gray-700 mb-4">Vuelos de Pasajeros en el Tiempo</h3>
+          <div className="h-60 bg-gray-100 rounded flex items-center justify-center text-gray-400">
+            [ Gráfico de líneas ]
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded shadow ">
+          <h3 className="text-lg font-semibold text-gray-700 mb-4">Totales de Vuelos en el Tiempo</h3>
+          <div className="h-60 bg-gray-100 rounded flex items-center justify-center text-gray-400">
+            [ Gráfico comparativo de vuelos totales ]
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const FinancialSummarySection = () => {
+  const [filter, setFilter] = useState<'day' | 'week' | 'month'>('day');
+  return (
+    <section className="mt-10">
+    <div className="flex items-center justify-between mb-4 px-2">
+      <h2 className="text-2xl font-bold text-gray-800 mb-4 px-2">Resumen Financiero</h2>
+      <div className="flex space-x-2">
+          {['day', 'week', 'month'].map((option) => (
+            <button
+              key={option}
+              onClick={() => setFilter(option as 'day' | 'week' | 'month')}
+              className={`px-4 py-1 rounded-full text-sm font-medium transition ${
+                filter === option
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-blue-100'
+              }`}
+            >
+              {option === 'day' ? 'Día' : option === 'week' ? 'Semana' : 'Mes'}
+            </button>
+          ))}
+        </div>
+    </div>
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="bg-white p-6 rounded shadow">
           <h3 className="text-sm text-gray-500 mb-1">Ingresos Totales</h3>
           <p className="text-3xl font-bold text-gray-900">$1,200,000</p>
@@ -106,6 +162,13 @@ const FlightPerformanceSection = () => {
           <h3 className="text-sm text-gray-500 mb-1">Combustible y Mantenimiento</h3>
           <p className="text-2xl font-bold text-gray-900">$500,000</p>
           <p className="text-gray-600 text-sm">Costos técnicos</p>
+        </div>
+      </div>
+
+      <div className="bg-white p-6 rounded shadow mt-6">
+        <h3 className="text-lg font-semibold text-gray-700 mb-4">Comparación de Ingresos vs Gastos</h3>
+        <div className="h-60 bg-gray-100 rounded flex items-center justify-center text-gray-400">
+          [ Gráfica de barras de ingresos vs gastos ]
         </div>
       </div>
     </section>
@@ -157,6 +220,7 @@ const PassengerStatsSection = () => {
               ↑ {filter === 'day' ? '8%' : filter === 'week' ? '6%' : '5%'}
             </p>
           </div>
+          
         </div>
 
         <div className="bg-white p-6 rounded shadow col-span-1">
@@ -167,14 +231,46 @@ const PassengerStatsSection = () => {
             [ Gráfica de barras ]
           </div>
         </div>
-
         <div className="bg-white p-6 rounded shadow col-span-1">
-          <h3 className="text-lg font-semibold text-gray-700 mb-4">
-            Comparación de Factor de Carga
-          </h3>
-          <div className="h-48 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-sm">
-            [ Gráfico apilado ]
-          </div>
+        <h3 className="text-lg font-semibold text-gray-700 mb-4">
+          Pasajeros por Clase
+        </h3>
+        <div className="h-48 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-sm">
+          [ Gráfica circular: Económica, Ejecutiva, Primera ]
+        </div>
+      </div>
+      </div>
+    </section>
+  );
+};
+
+
+const EmployeeStatsSection = () => {
+  return (
+    <section className="mt-10">
+    <div className="flex items-center justify-between mb-4 px-2">
+      <h2 className="text-2xl font-bold text-gray-800 mb-4 px-2">Resumen de Empleados</h2>
+    </div>
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="bg-white p-6 rounded shadow">
+          <h3 className="text-sm text-gray-500 mb-1">Empleados Totales</h3>
+          <p className="text-3xl font-bold text-gray-900">1,200</p>
+          <p className="text-green-600 text-sm">Empleados en general</p>
+        </div>
+        <div className="bg-white p-6 rounded shadow">
+          <h3 className="text-sm text-gray-500 mb-1">Pilotos</h3>
+          <p className="text-3xl font-bold text-red-500">200</p>
+          <p className="text-gray-600 text-sm">Especialistas en aviación</p>
+        </div>
+        <div className="bg-white p-6 rounded shadow">
+          <h3 className="text-sm text-gray-500 mb-1">Tripulantes</h3>
+          <p className="text-2xl font-bold text-gray-900">800</p>
+          <p className="text-gray-600 text-sm">Tripulantes de cabina de pasajeros</p>
+        </div>
+        <div className="bg-white p-6 rounded shadow">
+          <h3 className="text-sm text-gray-500 mb-1">Personla de tierra</h3>
+          <p className="text-2xl font-bold text-gray-900">200</p>
+          <p className="text-gray-600 text-sm">Especialistas en seguridad aeronautica</p>
         </div>
       </div>
     </section>
@@ -203,7 +299,9 @@ const AdminDashboardPage = () => {
       </h1>
 
       <FlightPerformanceSection />
+      <FinancialSummarySection />
       <PassengerStatsSection />
+      <EmployeeStatsSection />
     </section>
   );
 };

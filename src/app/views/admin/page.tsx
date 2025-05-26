@@ -7,7 +7,7 @@ const FlightPerformanceSection = () => {
   const [filter, setFilter] = useState<'day' | 'week' | 'month'>('day');
 
   return (
-    <section className="mt-10">
+ <section className="mt-10">
       <div className="flex items-center justify-between mb-4 px-2">
         <h2 className="text-2xl font-bold text-gray-800">Rendimiento de Vuelos</h2>
         <div className="flex space-x-2">
@@ -82,6 +82,30 @@ const FlightPerformanceSection = () => {
           <div className="h-48 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-sm">
             [ Gráfica comparativa ]
           </div>
+        </div>
+      </div>
+
+      {/* Nueva sección: Información Financiera */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-10">
+        <div className="bg-white p-6 rounded shadow">
+          <h3 className="text-sm text-gray-500 mb-1">Ingresos Totales</h3>
+          <p className="text-3xl font-bold text-gray-900">$1,200,000</p>
+          <p className="text-green-600 text-sm">Generado por vuelos</p>
+        </div>
+        <div className="bg-white p-6 rounded shadow">
+          <h3 className="text-sm text-gray-500 mb-1">Gastos Totales</h3>
+          <p className="text-3xl font-bold text-red-500">$850,000</p>
+          <p className="text-gray-600 text-sm">Costo operativo general</p>
+        </div>
+        <div className="bg-white p-6 rounded shadow">
+          <h3 className="text-sm text-gray-500 mb-1">Gastos por Empleados</h3>
+          <p className="text-2xl font-bold text-gray-900">$350,000</p>
+          <p className="text-gray-600 text-sm">Salarios y beneficios</p>
+        </div>
+        <div className="bg-white p-6 rounded shadow">
+          <h3 className="text-sm text-gray-500 mb-1">Combustible y Mantenimiento</h3>
+          <p className="text-2xl font-bold text-gray-900">$500,000</p>
+          <p className="text-gray-600 text-sm">Costos técnicos</p>
         </div>
       </div>
     </section>

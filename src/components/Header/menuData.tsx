@@ -22,22 +22,33 @@ export const menusByRole: Record<string, Menu[]> = {
 
   administrator: [
     { id: 1, title: "Dashboard", path: "/views/admin", newTab: false },
-    { id: 2, title: "Empleados", path: "/admin/employees", newTab: false },
-    { id: 3, title: "Trabajos", path: "/admin/jobs", newTab: false },
+    {
+      id: 7,
+      title: "Personas",
+      newTab: false,
+      submenu: [
+        { id: 71, title: "Roles", path: "/views/admin/roles", newTab: false },
+        { id: 72, title: "Usuarios", path: "/views/admin/users", newTab: false },
+        { id: 74, title: "Trabajos", path: "/views/admin/jobs", newTab: false },
+        { id: 75, title: "Horarios", path: "/views/admin/shifts", newTab: false },
+        { id: 73, title: "Empleados", path: "/views/admin/employees", newTab: false },
+
+      ],
+    },
+
     {
       id: 4,
       title: "Empresa",
       newTab: false,
       submenu: [
-        { id: 41, title: "Vuelos", path: "/admin/flights", newTab: false },
-        { id: 42, title: "Aeropuertos", path: "/admin/airports", newTab: false },
-        { id: 43, title: "Aeronaves", path: "/admin/aircrafts", newTab: false },
+        { id: 41, title: "Vuelos", path: "/views/admin/flights", newTab: false },
+        { id: 42, title: "Aeropuertos", path: "/views/admin/airports", newTab: false },
+        { id: 43, title: "Aeronaves", path: "/views/admin/aircrafts", newTab: false },
       ],
     },
-    { id: 5, title: "Reservaciones", path: "/admin/reservations", newTab: false },
-    { id: 6, title: "Equipaje", path: "/admin/baggage", newTab: false },
+    { id: 5, title: "Reservaciones", path: "/views/admin/reservations", newTab: false },
+    { id: 6, title: "Equipaje", path: "/views/admin/baggage", newTab: false },
   ],
-
   employee: [
     { id: 1, title: "Nomina", path: "/empleado/nomina", newTab: false },
     { id: 2, title: "Mis Vuelos", path: "/empleado/vuelos", newTab: false },

@@ -1,11 +1,65 @@
 "use client"
 
-import { useState } from "react"
+import { useState,useEffect } from "react"
+import { useSession } from "next-auth/react"
 import { Plane, Clock, CheckCircle } from "lucide-react"
+import { Session } from "inspector/promises";
 
 export default function AssignedFlights() {
-  const [selectedTab, setSelectedTab] = useState<"upcoming" | "today" | "completed">("today")
+   const { data: session } = useSession();
+  const [selectedTab, setSelectedTab] = useState<"upcoming" | "today" | "completed">("today");
+  const [flightsToday,setFlightsToday]=useState<any[]>([]);
+  const [flightsCompleted,setFlightsCompleted]=useState<any[]>([]);
+  const [flightsUpcoming,setFlightsUpcoming]=useState<any[]>([]);
+  
 
+  useEffect(()=>{
+    if(session?.user?.userId && session?.accessToken){
+        const fetchAllData=async () =>{
+          try{
+            const res = await fetch(`http://localhost:3000/api/v1/flights/employee/flightsNow/${session.user.userId}`, {
+              headers: {
+                Authorization: `Bearer ${session.accessToken}`,
+              },
+            })
+            if (!res.ok) throw new Error("Error al cargar el turno")
+            const data = await res.json()
+            setFlightsToday(data);
+          }catch(error){
+              console.error(error);
+          }
+          try{
+            const res = await fetch(`http://localhost:3000/api/v1/flights/employee/flightsAfter/${session.user.userId}`, {
+              headers: {
+                Authorization: `Bearer ${session.accessToken}`,
+              },
+            })
+            if (!res.ok) throw new Error("Error al cargar el turno")
+            const data = await res.json()
+            setFlightsUpcoming(data);
+          }catch(error){
+              console.error(error);
+          }
+          try{
+            const res = await fetch(`http://localhost:3000/api/v1/flights/employee/flightsBefore/${session.user.userId}`, {
+              headers: {
+                Authorization: `Bearer ${session.accessToken}`,
+              },
+            })
+            if (!res.ok) throw new Error("Error al cargar el turno")
+            const data = await res.json()
+            setFlightsCompleted(data);
+          }catch(error){
+              console.error(error);
+          }
+        }
+        fetchAllData();
+    }
+  })
+
+  console.log(flightsCompleted);
+  console.log(flightsToday)
+  console.log(flightsUpcoming)
   // Mock data para vuelos asignados
   const flightsData = {
     today: [
@@ -148,16 +202,19 @@ export default function AssignedFlights() {
     ],
   }
 
-  const getStatusColor = (status: string) => {
+ const getFlightStatusColor = (status: string) => {
     switch (status) {
-      case "on_time":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-      case "delayed":
-        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-      case "scheduled":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+      case "active":
+      case "in progress":
       case "completed":
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
+      case "resolved":
+        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+      case "on hold":
+      case "delayed":
+        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+      case "suspended":
+      case "cancelled":
+        return "bg-yellow-100 text-red-800 dark:bg-red-900 dark:text-red-200"
       default:
         return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
     }
@@ -179,17 +236,18 @@ export default function AssignedFlights() {
   }
 
   const getCurrentFlights = () => {
-    switch (selectedTab) {
-      case "today":
-        return flightsData.today
-      case "upcoming":
-        return flightsData.upcoming
-      case "completed":
-        return flightsData.completed
-      default:
-        return []
-    }
+  switch (selectedTab) {
+    case "today":
+      return flightsToday
+    case "upcoming":
+      return flightsUpcoming
+    case "completed":
+      return flightsCompleted
+    default:
+      return []
   }
+}
+
 
   const handleTaskToggle = (flightId: string, taskId: string) => {
     // Aquí iría la lógica para marcar/desmarcar tareas
@@ -223,7 +281,7 @@ export default function AssignedFlights() {
                   : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
               }`}
             >
-              Hoy ({flightsData.today.length})
+              Hoy ({flightsToday.length})
             </button>
             <button
               onClick={() => setSelectedTab("upcoming")}
@@ -233,7 +291,7 @@ export default function AssignedFlights() {
                   : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
               }`}
             >
-              Próximos ({flightsData.upcoming.length})
+              Próximos ({flightsUpcoming.length})
             </button>
             <button
               onClick={() => setSelectedTab("completed")}
@@ -243,7 +301,7 @@ export default function AssignedFlights() {
                   : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
               }`}
             >
-              Completados ({flightsData.completed.length})
+              Completados ({flightsCompleted.length})
             </button>
           </nav>
         </div>
@@ -251,188 +309,44 @@ export default function AssignedFlights() {
         <div className="p-6">
           <div className="space-y-6">
             {getCurrentFlights().map((flight) => (
-              <div key={flight.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-6">
-                {/* Flight Header */}
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <Plane className="w-6 h-6 text-primary" />
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{flight.flightNumber}</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{flight.aircraft.type}</p>
+                <div key={flight.flight_id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <Plane className="w-6 h-6 text-primary" />
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                          Vuelo #{flight.flight_id}
+                        </h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{flight.model}</p>
+                      </div>
                     </div>
+                   <span className={`px-3 py-1 rounded-full text-sm font-medium ${getFlightStatusColor(flight.status)}`}>
+                      {flight.status}
+                    </span>
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(flight.status)}`}>
-                    {getStatusText(flight.status)}
-                  </span>
-                </div>
 
-                {/* Flight Route */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Origen</p>
-                    <p className="font-semibold text-gray-900 dark:text-white">
-                      {flight.route.from.code} - {flight.route.from.city}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-500">{flight.route.from.terminal}</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Duración</p>
-                    <p className="font-semibold text-gray-900 dark:text-white">{flight.schedule.duration}</p>
-                    {flight.date && (
-                      <p className="text-xs text-gray-500 dark:text-gray-500">
-                        {new Date(flight.date).toLocaleDateString("es-ES")}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Origen</p>
+                      <p className="font-semibold text-gray-900 dark:text-white">{flight.origen}</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Horario</p>
+                      <p className="font-semibold text-gray-900 dark:text-white">
+                        {flight.departure_date}
                       </p>
-                    )}
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Destino</p>
-                    <p className="font-semibold text-gray-900 dark:text-white">
-                      {flight.route.to.code} - {flight.route.to.city}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-500">{flight.route.to.terminal}</p>
-                  </div>
-                </div>
-
-                {/* Flight Times */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-gray-500" />
-                    <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Salida</p>
-                      <p className="font-semibold text-gray-900 dark:text-white">{flight.schedule.departure}</p>
-                      {flight.schedule.actualDeparture && (
-                        <p className="text-xs text-gray-500 dark:text-gray-500">
-                          Real: {flight.schedule.actualDeparture}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-gray-500" />
-                    <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Llegada</p>
-                      <p className="font-semibold text-gray-900 dark:text-white">{flight.schedule.arrival}</p>
-                      {flight.schedule.actualArrival && (
-                        <p className="text-xs text-gray-500 dark:text-gray-500">
-                          Real: {flight.schedule.actualArrival}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Aircraft and Gate Info */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Aeronave</p>
-                    <p className="font-semibold text-gray-900 dark:text-white">{flight.aircraft.registration}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Puerta</p>
-                    <p className="font-semibold text-gray-900 dark:text-white">{flight.aircraft.gate}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Pasajeros</p>
-                    <p className="font-semibold text-gray-900 dark:text-white">
-                      {flight.passengers.checkedIn}/{flight.passengers.booked} ({flight.passengers.capacity} cap.)
-                    </p>
-                  </div>
-                </div>
-
-                {/* Crew Information */}
-                <div className="mb-6">
-                  <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Tripulación</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Cabina de mando</p>
-                      <p className="text-sm text-gray-900 dark:text-white">Capitán: {flight.crew.captain}</p>
-                      <p className="text-sm text-gray-900 dark:text-white">
-                        Primer Oficial: {flight.crew.firstOfficer}
+                      <p className="font-semibold text-gray-900 dark:text-white">
+                        {flight.departure_time} → {flight.arrival_time}
                       </p>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Tripulación de cabina</p>
-                      {flight.crew.cabinCrew.map((member, index) => (
-                        <p key={index} className="text-sm text-gray-900 dark:text-white">
-                          TCP: {member}
-                        </p>
-                      ))}
+                    <div className="text-right">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Destino</p>
+                      <p className="font-semibold text-gray-900 dark:text-white">{flight.destino}</p>
                     </div>
                   </div>
                 </div>
+              ))}
 
-                {/* Tasks (only for today's flights) */}
-                {selectedTab === "today" && flight.tasks && (
-                  <div className="mb-6">
-                    <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Tareas Pre-vuelo</h4>
-                    <div className="space-y-2">
-                      {flight.tasks.map((task) => (
-                        <div key={task.id} className="flex items-center gap-3">
-                          <button
-                            onClick={() => handleTaskToggle(flight.id, task.id)}
-                            className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
-                              task.completed
-                                ? "bg-green-500 border-green-500 text-white"
-                                : "border-gray-300 dark:border-gray-600"
-                            }`}
-                          >
-                            {task.completed && <CheckCircle className="w-3 h-3" />}
-                          </button>
-                          <span
-                            className={`text-sm ${
-                              task.completed
-                                ? "text-gray-500 dark:text-gray-400 line-through"
-                                : "text-gray-900 dark:text-white"
-                            }`}
-                          >
-                            {task.task}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Performance (only for completed flights) */}
-                {selectedTab === "completed" && flight.performance && (
-                  <div className="mb-6">
-                    <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Rendimiento</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">Puntualidad</p>
-                        <p className="font-semibold text-green-600">{flight.performance.onTimePerformance}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">Eficiencia de combustible</p>
-                        <p className="font-semibold text-green-600">{flight.performance.fuelEfficiency}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">Satisfacción del pasajero</p>
-                        <p className="font-semibold text-green-600">{flight.performance.passengerSatisfaction}</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Actions */}
-                <div className="flex flex-wrap gap-3">
-                  {selectedTab === "upcoming" && (
-                    <button
-                      onClick={() => handleConfirmAssignment(flight.id)}
-                      className="bg-primary hover:bg-primary/80 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-300"
-                    >
-                      Confirmar Asignación
-                    </button>
-                  )}
-                  <button className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 px-4 py-2 rounded-md text-sm font-medium transition duration-300">
-                    Ver Detalles
-                  </button>
-                  <button className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 px-4 py-2 rounded-md text-sm font-medium transition duration-300">
-                    Descargar Briefing
-                  </button>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </div>

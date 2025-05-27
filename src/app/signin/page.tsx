@@ -46,9 +46,9 @@ const SigninPage = () => {
     if (session.user.role === 'administrator') {
       router.push('/views/admin');
     } else if (session.user.role === 'employee') {
-      router.push('/views/employee');
+      router.push('/empleado/horario');
     } else if (session.user.role === 'passenger') {
-      router.push('/passenger/home');
+      router.push('/');
     }
   }
 }, [session]);

@@ -3,7 +3,6 @@
 import { useSession } from "next-auth/react"
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
-import EmployeeHeader from "@/components/EmployeeHeader"
 import ScheduleDashboard from "@/components/Empleado/ScheduleDashboard"
 
 const EmpleadoHorarioPage = () => {
@@ -24,7 +23,6 @@ const EmpleadoHorarioPage = () => {
 
   return (
     <>
-      <EmployeeHeader />
       <section className="pt-[120px] pb-[120px]">
         <div className="container">
           <ScheduleDashboard />

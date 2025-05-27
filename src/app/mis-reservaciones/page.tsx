@@ -1,13 +1,45 @@
+'use client';
 import type { Metadata } from "next"
 import ReservationCard from "@/components/Reservaciones/ReservationCard"
 import { mockReservations } from "@/components/Reservaciones/mockReservations"
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import {useSession } from 'next-auth/react';
 
-export const metadata: Metadata = {
-  title: "Mis Reservaciones | Ali Airways",
-  description: "Gestiona tus reservaciones de vuelo",
-}
 
 export default function MisReservacionesPage() {
+   const { data: session, status } = useSession();
+  const [dataReservation, setDataReservation]= useState<any>(null);
+
+  useEffect(()=> {
+    if(session?.user?.userId && session?.accessToken) {
+      const fetchReservations = async () => {
+        try {
+          const response = await fetch(`http://localhost:3000/api/v1/reservations/reservationsByUser/${session.user.userId}`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.accessToken}`,
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error("Error al obtener las reservaciones.");
+          }
+
+          const reservations = await response.json();
+          setDataReservation(reservations);
+          console.log("Reservaciones obtenidas:", reservations);
+        } catch (error) {
+          console.error("Error fetching reservations:", error);
+        }
+      }
+      fetchReservations();
+    
+    }
+    
+  }), [session, status];
+
   return (
     <section className="py-16 md:py-20 lg:py-28">
       <div className="container">
@@ -31,10 +63,15 @@ export default function MisReservacionesPage() {
           </div>
 
           <div className="space-y-6">
-            {mockReservations.map((reservation) => (
-              <ReservationCard key={reservation.id} reservation={reservation} />
+          {dataReservation &&
+            dataReservation.map((reservation: any) => (
+              <ReservationCard
+                key={reservation.reservation_id}
+                reservation={reservation}
+              />
             ))}
-          </div>
+        </div>
+
 
           {mockReservations.length === 0 && (
             <div className="text-center py-12">

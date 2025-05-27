@@ -28,14 +28,23 @@ interface flight{
   estado:string|null
 }
 
-export default function CheckInForm() {
+export default function CheckInForm({reservationId,
+  lastName,
+}: {
+  reservationId?: string;
+  lastName?: string;
+}) {
+  
+  //const { flight, passenger, status, createdAt } = reservation
+
+  //const { flight, passenger, status, createdAt } = reservation
   const { data: session, status } = useSession();
   const [flightData, setFlightData] = useState<flight>(null)
   const [currentStep, setCurrentStep] = useState<CheckInStep>("search")
   const [searchType, setSearchType] = useState<"reservation" | "passenger">("reservation")
   const [formData, setFormData] = useState({
-    reservationNumber: "",
-    lastName: "",
+    reservationNumber:reservationId || "",
+    lastName: lastName || "",
     firstName: "",
     email: "",
   })

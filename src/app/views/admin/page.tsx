@@ -1,13 +1,109 @@
 'use client';
-import { useSession } from 'next-auth/react';
+import { useSession, getSession} from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Bar,Doughnut } from 'react-chartjs-2';
+import {Chart as ChartJS,BarElement,CategoryScale,LinearScale,Tooltip,Legend,} from 'chart.js';
+import { ArcElement } from 'chart.js';
+
+ChartJS.register(BarElement, CategoryScale, LinearScale,ArcElement, Tooltip, Legend);
 
 const FlightPerformanceSection = () => {
+  const [flightData, setFlightData] = useState([]);
   const [filter, setFilter] = useState<'day' | 'week' | 'month'>('day');
+  const [kpis, setKpis] = useState({
+    total_flights: 0,
+    completed_pct: 0,
+    pending_pct: 0,
+    cancelled_pct: 0,
+    growth_vs_previous: 0,
+  });
+  const [currentFlights, setCurrentFlights] = useState({ arrivals: 0, departures: 0 });
+  const [totalFlights, setTotalFlights] = useState(0);
+
+
+  useEffect(() => {
+    const fetchKPIs = async () => {
+      try {
+        const session = await getSession();
+        const token = session?.accessToken;
+        if (!token) {
+          console.warn('No se encontró el token en la sesión');
+          return;
+        }
+        const res = await fetch(`http://localhost:3000/api/v1/flights/dashboard/kpis?range=${filter}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await res.json();
+        console.log('KPIs:', data);
+        setKpis(data);
+      } catch (error) {
+      console.error('Error al obtener KPIs de vuelos:', error);
+      }
+    };
+    fetchKPIs();
+
+    const fetchCurrentFlights = async () => {
+      try {
+        const session = await getSession();
+        const token = session?.accessToken;
+
+        const res = await fetch('http://localhost:3000/api/v1/flights/dashboard/current-flights', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await res.json();
+        setCurrentFlights(data);
+      } catch (error) {
+        console.error('Error al obtener vuelos en curso:', error);
+      }
+    };
+    fetchCurrentFlights();
+
+    const fetchTotalFlights = async () => {
+    try {
+      const session = await getSession();
+      const token = session?.accessToken;
+
+      const res = await fetch(`http://localhost:3000/api/v1/flights/dashboard/flights-count`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+      setTotalFlights(data.total);  // más directo
+    } catch (error) {
+      console.error('Error al obtener el total de vuelos:', error);
+    }
+    
+    };
+    fetchTotalFlights();
+
+    const fetchFlightData = async () => {
+      const session = await getSession();
+      const token = session?.accessToken;
+
+      const res = await fetch(`http://localhost:3000/api/v1/flights/dashboard/flights-over-time?range=${filter}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await res.json();
+      setFlightData(data);
+    };
+    fetchFlightData();
+
+
+  }, [filter]);
 
   return (
-<section className="mt-10">
+    <section className="mt-10">
       {/* Encabezado y filtro */}
       <div className="flex items-center justify-between mb-4 px-2">
         <h2 className="text-2xl font-bold text-gray-800">Rendimiento de Vuelos</h2>
@@ -33,25 +129,36 @@ const FlightPerformanceSection = () => {
         {/* Vuelos Totales */}
         <div className="bg-white p-6 rounded shadow flex flex-col justify-between">
           <div className="mb-8">
-            <h3 className="text-gray-500 text-sm mb-1">Vuelos Totales ({filter})</h3>
-            <p className="text-4xl font-bold text-gray-900">
-              {filter === 'day' ? '342' : filter === 'week' ? '2,450' : '9,820'}
-            </p>
-            <p className="text-green-600 text-sm mt-1">
-              ↑ {filter === 'day' ? '5%' : filter === 'week' ? '8%' : '11%'} vs periodo anterior
+            <h3 className="text-lg font-semibold text-gray-700 mb-4">Vuelos Totales ({filter})</h3>
+            <p className="text-4xl font-bold text-gray-900">{kpis.total_flights}</p>
+            <p 
+              className={`text-sm mt-1 ${
+              kpis.growth_vs_previous >= 0 ? 'text-green-600' : 'text-red-500'
+            }`}
+          >
+            {kpis.growth_vs_previous >= 0 ? '↑' : '↓'} {Math.abs(kpis.growth_vs_previous)}% vs periodo anterior
             </p>
           </div>
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600">Vuelos Puntuales</p>
-                <p className="font-semibold text-green-600">
-                  {filter === 'day' ? '92%' : filter === 'week' ? '89%' : '87%'}
-                </p>
+                <p className="text-gray-600">Vuelos Completados</p>
+                <p className="font-semibold text-green-600">{kpis.completed_pct}%</p>
               </div>
               <div className="w-14 h-14 bg-gray-200 rounded-full flex items-center justify-center">
                 <span className="text-sm font-bold text-green-600">
-                  {filter === 'day' ? '92%' : filter === 'week' ? '89%' : '87%'}
+                  {kpis.completed_pct}%
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600">Vuelos Pendientes</p>
+                <p className="font-semibold text-amber-500">{kpis.pending_pct}%</p>
+              </div>
+              <div className="w-14 h-14 bg-gray-200 rounded-full flex items-center justify-center">
+                <span className="text-sm font-bold text-amber-500">
+                  {kpis.pending_pct}%
                 </span>
               </div>
             </div>
@@ -59,12 +166,12 @@ const FlightPerformanceSection = () => {
               <div>
                 <p className="text-gray-600">Vuelos Cancelados</p>
                 <p className="font-semibold text-red-500">
-                  {filter === 'day' ? '3%' : filter === 'week' ? '4%' : '5%'}
+                  {kpis.cancelled_pct}%
                 </p>
               </div>
               <div className="w-14 h-14 bg-gray-200 rounded-full flex items-center justify-center">
                 <span className="text-sm font-bold text-red-500">
-                  {filter === 'day' ? '3%' : filter === 'week' ? '4%' : '5%'}
+                  {kpis.cancelled_pct}%
                 </span>
               </div>
             </div>
@@ -73,29 +180,32 @@ const FlightPerformanceSection = () => {
 
         {/* Vuelos en Curso */}
         <div className="bg-white p-6 rounded shadow">
-          <h3 className="text-lg font-semibold text-gray-700 mb-4">Vuelos en Curso</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-gray-100 p-4 rounded text-center">
-              <p className="text-sm text-gray-600 mb-1">Llegadas</p>
-              <p className="text-3xl font-bold text-blue-600">68</p>
-            </div>
-            <div className="bg-gray-100 p-4 rounded text-center">
-              <p className="text-sm text-gray-600 mb-1">Salidas</p>
-              <p className="text-3xl font-bold text-blue-600">74</p>
-            </div>
-          </div>
+          <h3 className="text-lg font-semibold text-gray-700 mb-4">Vuelos en curso</h3>
+          <div className="grid grid-cols-1 gap-4">
+        <div className="bg-gray-100 p-4 rounded text-center">
+          <p className="text-sm text-gray-600 mb-1">Llegadas</p>
+          <p className="text-3xl font-bold text-blue-600">{currentFlights.arrivals}</p>
+        </div>
+        <div className="bg-gray-100 p-4 rounded text-center">
+          <p className="text-sm text-gray-600 mb-1">Salidas</p>
+          <p className="text-3xl font-bold text-blue-600">{currentFlights.departures}</p>
+        </div>
+        </div>
         </div>
 
         {/* Vuelos Programados */}
         <div className="bg-white p-6 rounded shadow flex flex-col justify-between">
           <div>
-            <h3 className="text-gray-500 text-sm mb-1">Vuelos Programados</h3>
-            <p className="text-4xl font-bold text-gray-900">
-              {filter === 'day' ? '390' : filter === 'week' ? '2,600' : '10,100'}
-            </p>
-            <p className="text-gray-600 text-sm mt-2">
-              Incluye vuelos próximos a operar en el periodo seleccionado.
-            </p>
+            <h3 className="text-lg font-semibold text-gray-700 mb-4">Vuelos Programados</h3>
+              <div className="flex-1 flex items-center justify-center">
+                <div className="bg-gray-100 w-full h-32 rounded flex items-center justify-center">
+                  <p className="text-6xl font-extrabold text-blue-600">{totalFlights}</p>
+                </div>
+              </div>
+
+              <p className="text-gray-600 text-sm mt-4 text-center">
+                Incluye vuelos próximos a operar en el periodo seleccionado.
+              </p>
           </div>
         </div>
       </div>
@@ -103,16 +213,63 @@ const FlightPerformanceSection = () => {
       {/* Gráficas extendidas */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
         <div className="bg-white p-6 rounded shadow ">
-          <h3 className="text-lg font-semibold text-gray-700 mb-4">Vuelos de Pasajeros en el Tiempo</h3>
+          <h3 className="text-lg font-semibold text-gray-700 mb-4">Grafica 1</h3>
           <div className="h-60 bg-gray-100 rounded flex items-center justify-center text-gray-400">
-            [ Gráfico de líneas ]
+            <Doughnut
+    data={{
+      labels: ['Completados', 'Pendientes', 'Cancelados'],
+      datasets: [
+        {
+          data: [
+            kpis.completed_pct,
+            kpis.pending_pct,
+            kpis.cancelled_pct
+          ],
+          backgroundColor: ['#16a34a', '#f59e0b', '#dc2626'], // verde, ámbar, rojo
+          borderWidth: 1,
+        },
+      ],
+    }}
+    options={{
+      plugins: {
+        legend: {
+          display: true,
+          position: 'bottom',
+        },
+      },
+      cutout: '70%', // grosor de la dona
+      responsive: true,
+      maintainAspectRatio: false,
+    }}
+  />
           </div>
         </div>
 
         <div className="bg-white p-6 rounded shadow ">
-          <h3 className="text-lg font-semibold text-gray-700 mb-4">Totales de Vuelos en el Tiempo</h3>
+          <h3 className="text-lg font-semibold text-gray-700 mb-4">Totales de Vuelos en el tiempo</h3>
           <div className="h-60 bg-gray-100 rounded flex items-center justify-center text-gray-400">
-            [ Gráfico comparativo de vuelos totales ]
+            <Bar
+              data={{
+                labels: flightData.map(item => item.label),
+                datasets: [
+                  {
+                    label: 'Total de Vuelos',
+                    data: flightData.map(item => item.total),
+                    backgroundColor: '#3b82f6', // azul
+                  },
+                ],
+              }}
+              options={{
+                responsive: true,
+                plugins: {
+                  legend: { display: false },
+                  tooltip: { enabled: true },
+                },
+                scales: {
+                  y: { beginAtZero: true },
+                },
+              }}
+            />
           </div>
         </div>
       </div>

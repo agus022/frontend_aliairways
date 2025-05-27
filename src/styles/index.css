@@ -133,3 +133,10 @@ layer(base);
     @apply inline-flex;
   }
 }
+
+
+
+body.modal-open {
+  overflow: hidden;
+  height: 100vh;
+}

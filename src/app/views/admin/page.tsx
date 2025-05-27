@@ -2,11 +2,11 @@
 import { useSession, getSession} from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Bar,Doughnut } from 'react-chartjs-2';
-import {Chart as ChartJS,BarElement,CategoryScale,LinearScale,Tooltip,Legend,} from 'chart.js';
+import { Bar,Doughnut,Line } from 'react-chartjs-2';
+import {Chart as ChartJS,BarElement,CategoryScale,LinearScale,Tooltip,Legend,LineElement, PointElement,} from 'chart.js';
 import { ArcElement } from 'chart.js';
 
-ChartJS.register(BarElement, CategoryScale, LinearScale,ArcElement, Tooltip, Legend);
+ChartJS.register(BarElement, CategoryScale, LinearScale,ArcElement,LineElement,PointElement, Tooltip, Legend);
 
 const FlightPerformanceSection = () => {
   const [flightData, setFlightData] = useState([]);
@@ -213,7 +213,7 @@ const FlightPerformanceSection = () => {
       {/* Gráficas extendidas */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
         <div className="bg-white p-6 rounded shadow ">
-          <h3 className="text-lg font-semibold text-gray-700 mb-4">Grafica 1</h3>
+          <h3 className="text-lg font-semibold text-gray-700 mb-4">Estado de vuelos</h3>
           <div className="h-60 bg-gray-100 rounded flex items-center justify-center text-gray-400">
             <Doughnut
     data={{
@@ -279,6 +279,34 @@ const FlightPerformanceSection = () => {
 
 const FinancialSummarySection = () => {
   const [filter, setFilter] = useState<'day' | 'week' | 'month'>('day');
+    const [financialData, setFinancialData] = useState({
+    total_income: 0,
+    total_expenses: 0,
+    employee_expenses: 0,
+    maintenance_fuel_expenses: 0,
+  });
+  useEffect(() => {
+    const fetchFinancialSummary = async () => {
+      const session = await getSession();
+      const token = session?.accessToken;
+      if (!token) return;
+
+      try {
+        const res = await fetch(`http://localhost:3000/api/v1/flights/dashboard/financials?range=${filter}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await res.json();
+        setFinancialData(data);
+      } catch (error) {
+        console.error('Error al obtener resumen financiero:', error);
+      }
+    };
+
+    fetchFinancialSummary();
+  }, [filter]);
   return (
     <section className="mt-10">
     <div className="flex items-center justify-between mb-4 px-2">
@@ -302,30 +330,76 @@ const FinancialSummarySection = () => {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="bg-white p-6 rounded shadow">
           <h3 className="text-sm text-gray-500 mb-1">Ingresos Totales</h3>
-          <p className="text-3xl font-bold text-gray-900">$1,200,000</p>
+          <p className="text-3xl font-bold text-gray-900"> ${financialData.total_income.toLocaleString()}</p>
           <p className="text-green-600 text-sm">Generado por vuelos</p>
         </div>
         <div className="bg-white p-6 rounded shadow">
           <h3 className="text-sm text-gray-500 mb-1">Gastos Totales</h3>
-          <p className="text-3xl font-bold text-red-500">$850,000</p>
+          <p className="text-3xl font-bold text-red-500">${financialData.total_expenses.toLocaleString()}</p>
           <p className="text-gray-600 text-sm">Costo operativo general</p>
         </div>
         <div className="bg-white p-6 rounded shadow">
           <h3 className="text-sm text-gray-500 mb-1">Gastos por Empleados</h3>
-          <p className="text-2xl font-bold text-gray-900">$350,000</p>
+          <p className="text-2xl font-bold text-gray-900"> ${financialData.employee_expenses.toLocaleString()}</p>
           <p className="text-gray-600 text-sm">Salarios y beneficios</p>
         </div>
         <div className="bg-white p-6 rounded shadow">
           <h3 className="text-sm text-gray-500 mb-1">Combustible y Mantenimiento</h3>
-          <p className="text-2xl font-bold text-gray-900">$500,000</p>
+          <p className="text-2xl font-bold text-gray-900">${financialData.maintenance_fuel_expenses.toLocaleString()}</p>
           <p className="text-gray-600 text-sm">Costos técnicos</p>
         </div>
       </div>
-
       <div className="bg-white p-6 rounded shadow mt-6">
         <h3 className="text-lg font-semibold text-gray-700 mb-4">Comparación de Ingresos vs Gastos</h3>
-        <div className="h-60 bg-gray-100 rounded flex items-center justify-center text-gray-400">
-          [ Gráfica de barras de ingresos vs gastos ]
+        <div className="relative w-full h-[300px]">
+          <Bar
+            data={{
+              labels: ['Ingresos', 'Gastos'],
+              datasets: [
+                {
+                  label: 'Monto ($)',
+                  data: [financialData.total_income, financialData.total_expenses],
+                  backgroundColor: ['#22c55e', '#ef4444'], // verde y rojo
+                  borderRadius: 8,
+                  barThickness: 40
+                },
+              ],
+            }}
+            options={{
+              indexAxis: 'y', // HORIZONTAL
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                x: {
+                  beginAtZero: true,
+                  ticks: {
+                    callback: (value) => `$${Number(value).toLocaleString()}`,
+                    color: '#4B5563',
+                  },
+                  title: {
+                    display: true,
+                    text: 'Monto ($)',
+                    color: '#6B7280',
+                  },
+                },
+                y: {
+                  ticks: {
+                    color: '#374151',
+                    font: { weight: 'bold' },
+                  },
+                },
+              },
+              plugins: {
+                legend: { display: false },
+                tooltip: {
+                  callbacks: {
+                    label: (context) =>
+                      `$${context.raw?.toLocaleString()}`,
+                  },
+                },
+              },
+            }}
+          />
         </div>
       </div>
     </section>
@@ -334,6 +408,116 @@ const FinancialSummarySection = () => {
 
 const PassengerStatsSection = () => {
   const [filter, setFilter] = useState<'day' | 'week' | 'month'>('day');
+  const [stats, setStats] = useState({
+    passenger_count: 0,
+    passenger_growth_pct: 0,
+    avg_load_factor: 0,
+    load_factor_growth_pct: 0,
+  });
+
+  const [classData, setClassData] = useState({ Economica: 0, Ejecutiva: 0, Primera: 0 });
+  const passengerGoal = 100000; // Meta ficticia de passengers 
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+  const fetchPassengerStats = async () => {
+    const session = await getSession();
+    const token = session?.accessToken;
+    if (!token) return;
+
+    try {
+      const res = await fetch(`http://localhost:3000/api/v1/passengers/dashboard/kpis?range=${filter}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+      setStats(data);
+    } catch (error) {
+      console.error('Error al obtener estadísticas de pasajeros:', error);
+    }
+  };
+  fetchPassengerStats();
+
+  const fetchDataPassengerByClass = async () => {
+      const session = await getSession();
+      const token = session?.accessToken;
+      if (!token) return;
+
+      try {
+        const res = await fetch(`http://localhost:3000/api/v1/passengers/dashboard/passenger-by-class?range=${filter}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await res.json();
+        setClassData(data);
+      } catch (error) {
+        console.error('Error al obtener datos por clase:', error);
+      }
+    };
+    fetchDataPassengerByClass();
+
+    const fetchPassengerCount = async () => {
+      const session = await getSession();
+      const token = session?.accessToken;
+      if (!token) return;
+
+      try {
+        const res = await fetch('http://localhost:3000/api/v1/passengers/dashboard/passenger-count', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await res.json();
+        setCount(data.total);
+      } catch (error) {
+        console.error('Error al obtener total de pasajeros:', error);
+      }
+    };
+
+    fetchPassengerCount();
+  }, [filter]);
+
+  //pastel 
+  const doughnutData = {
+    labels: ['Económica', 'Ejecutiva', 'Primera'],
+    datasets: [
+      {
+        data: [classData.Economica, classData.Ejecutiva, classData.Primera],
+        backgroundColor: [
+          'rgb(59, 130, 246)',    // azul
+          'rgb(234, 179, 8)',     // ámbar
+          'rgb(239, 68, 68)',     // rojo
+        ],
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  //dona del progreso  para passengers pasajeros al largo del tiempo 
+  const data = {
+    labels: ['Registrados', 'Faltantes'],
+    datasets: [
+      {
+        data: [count, Math.max(passengerGoal - count, 0)],
+        backgroundColor: ['#3b82f6', '#e5e7eb'], // azul + gris
+        borderWidth: 0,
+      },
+    ],
+  };
+
+  const options = {
+    cutout: '70%',
+    plugins: {
+      legend: {
+        display: false,
+      },
+    },
+  };
 
   return (
     <section className="mt-10">
@@ -361,20 +545,20 @@ const PassengerStatsSection = () => {
           <div className="mb-8">
             <h3 className="text-gray-500 text-sm mb-1">Pasajeros Transportados</h3>
             <p className="text-4xl font-bold text-gray-900">
-              {filter === 'day' ? '53,500' : filter === 'week' ? '325,000' : '1.2M'}
+              {stats.passenger_count.toLocaleString()}
             </p>
             <p className="text-green-600 text-sm mt-1">
-              ↑ {filter === 'day' ? '13%' : filter === 'week' ? '10%' : '15%'} vs periodo anterior
+              ↑ {stats.passenger_growth_pct}% vs periodo anterior
             </p>
           </div>
 
           <div>
             <p className="text-gray-500 text-sm mb-1">Factor de Carga Promedio</p>
             <p className="text-3xl font-bold text-blue-600">
-              {filter === 'day' ? '89.1%' : filter === 'week' ? '87.5%' : '85.3%'}
+              {stats.avg_load_factor.toFixed(1)}%
             </p>
             <p className="text-green-600 text-sm mt-1">
-              ↑ {filter === 'day' ? '8%' : filter === 'week' ? '6%' : '5%'}
+              ↑ {stats.load_factor_growth_pct}%
             </p>
           </div>
           
@@ -385,7 +569,12 @@ const PassengerStatsSection = () => {
             Pasajeros a lo largo del tiempo
           </h3>
           <div className="h-48 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-sm">
-            [ Gráfica de barras ]
+            <div className="relative w-48 h-48 mx-auto">
+            <Doughnut data={data} options={options} />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-2xl font-bold text-gray-800">{count.toLocaleString()}</span>
+            </div>
+          </div>
           </div>
         </div>
         <div className="bg-white p-6 rounded shadow col-span-1">
@@ -393,7 +582,19 @@ const PassengerStatsSection = () => {
           Pasajeros por Clase
         </h3>
         <div className="h-48 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-sm">
-          [ Gráfica circular: Económica, Ejecutiva, Primera ]
+          <div className="h-48 bg-gray-100 rounded flex items-center justify-center">
+            <Doughnut
+              data={doughnutData}
+              options={{
+                responsive: true,
+                plugins: {
+                  legend: {
+                    position: 'bottom',
+                  },
+                },
+              }}
+            />
+          </div>
         </div>
       </div>
       </div>
@@ -403,6 +604,36 @@ const PassengerStatsSection = () => {
 
 
 const EmployeeStatsSection = () => {
+
+  const [employeeSummary, setEmployeeSummary] = useState({
+    total_employees: 0,
+    pilots: 0,
+    crew: 0,
+    ground: 0,
+  });
+
+  useEffect(() => {
+    const fetchEmployeeSummary = async () => {
+      const session = await getSession();
+      const token = session?.accessToken;
+      if (!token) return;
+
+      try {
+        const res = await fetch('http://localhost:3000/api/v1/employees/dashboard/summary', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await res.json();
+        setEmployeeSummary(data);
+      } catch (error) {
+        console.error('Error al obtener resumen de empleados:', error);
+      }
+    };
+
+    fetchEmployeeSummary();
+  }, []);
   return (
     <section className="mt-10">
     <div className="flex items-center justify-between mb-4 px-2">
@@ -411,22 +642,22 @@ const EmployeeStatsSection = () => {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="bg-white p-6 rounded shadow">
           <h3 className="text-sm text-gray-500 mb-1">Empleados Totales</h3>
-          <p className="text-3xl font-bold text-gray-900">1,200</p>
+          <p className="text-3xl font-bold text-gray-900">{employeeSummary.total_employees.toLocaleString()}</p>
           <p className="text-green-600 text-sm">Empleados en general</p>
         </div>
         <div className="bg-white p-6 rounded shadow">
           <h3 className="text-sm text-gray-500 mb-1">Pilotos</h3>
-          <p className="text-3xl font-bold text-red-500">200</p>
+          <p className="text-3xl font-bold text-red-500">{employeeSummary.pilots.toLocaleString()}</p>
           <p className="text-gray-600 text-sm">Especialistas en aviación</p>
         </div>
         <div className="bg-white p-6 rounded shadow">
           <h3 className="text-sm text-gray-500 mb-1">Tripulantes</h3>
-          <p className="text-2xl font-bold text-gray-900">800</p>
+          <p className="text-2xl font-bold text-gray-900">{employeeSummary.crew.toLocaleString()}</p>
           <p className="text-gray-600 text-sm">Tripulantes de cabina de pasajeros</p>
         </div>
         <div className="bg-white p-6 rounded shadow">
           <h3 className="text-sm text-gray-500 mb-1">Personla de tierra</h3>
-          <p className="text-2xl font-bold text-gray-900">200</p>
+          <p className="text-2xl font-bold text-gray-900">{employeeSummary.ground.toLocaleString()}</p>
           <p className="text-gray-600 text-sm">Especialistas en seguridad aeronautica</p>
         </div>
       </div>

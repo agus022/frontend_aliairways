@@ -40,7 +40,7 @@ export default function SeatSelection({ onSeatSelect, onBack, flighData }: SeatS
   const [seats, setSeats] = useState<Seat[]>([]);
   const [selectedSeat, setSelectedSeat] = useState<string | null>(null)
 
-  let aircraft_id;
+  const [aircraftId, setAircraftId] = useState(null);
   useEffect(() => {
     const fetchSeats = async () => {
       if (session?.user?.userId && session?.accessToken) {
@@ -50,8 +50,17 @@ export default function SeatSelection({ onSeatSelect, onBack, flighData }: SeatS
               Authorization: `Bearer ${session.accessToken}`
             }
           });
+          
           const seatData = await res.json();
-          aircraft_id=seatData[0].aircraft_id;
+          console.log("Datos de asientos obtenidos:", seatData);
+
+          if (seatData.length > 0) {
+            const aircraft_id = seatData[0].aircraft_id; // Declaración correcta
+            console.log("Aircraft ID:", aircraft_id);
+
+            // Si necesitas usarlo en el estado:
+            setAircraftId(aircraft_id); // Suponiendo que tienes un useState para esto
+          }
           setSeats(seatData);
         } catch (error) {
           console.error("Error al obtener los asientos:", error);
@@ -105,8 +114,37 @@ export default function SeatSelection({ onSeatSelect, onBack, flighData }: SeatS
     return `$${seat.position}`;
   };
 
-  const handleSeatClick = (seatId: string) => {
+  const handleSeatClick = async (seatId: string) => {
+    console.log("Asiento seleccionado:", seatId,"id:", aircraftId, "flight_id:", flighData.reservation_id);
     const seatClass = getSeatClass(seatId);
+     if (session?.user?.userId && session?.accessToken && selectedSeat && flighData?.flight_id) {
+    try {
+      const res = await fetch(`http://localhost:3000/api/v1/seats/updateSeatReservation/${flighData.reservation_id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.accessToken}`
+        },
+        body: JSON.stringify({
+          aircraft_id: aircraftId,
+          seat_id: seatId
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error("Error al actualizar el asiento.");
+      }
+      console.log()
+      const updatedSeat = await res.json();
+      console.log("Asiento actualizado:", updatedSeat);
+
+    } catch (error) {
+      console.error("Error al actualizar el asiento:", error);
+    }
+      }else{
+        console.log("No hay sesión activa o datos de usuario disponibles.");
+      }
+    console.log("Clase del asiento-------:", seatClass);
     if (seatClass === "unavailable" || seatClass === "occupied") return;
     setSelectedSeat(seatId);
 
@@ -122,7 +160,7 @@ export default function SeatSelection({ onSeatSelect, onBack, flighData }: SeatS
           Authorization: `Bearer ${session.accessToken}`
         },
         body: JSON.stringify({
-          aircraft_id: aircraft_id,
+          aircraft_id: aircraftId,
           seat_id: selectedSeat
         })
       });
@@ -132,6 +170,7 @@ export default function SeatSelection({ onSeatSelect, onBack, flighData }: SeatS
       }
 
       const updatedSeat = await res.json();
+
       console.log("Asiento actualizado:", updatedSeat);
 
       // ✅ Avanza al siguiente paso del check-in

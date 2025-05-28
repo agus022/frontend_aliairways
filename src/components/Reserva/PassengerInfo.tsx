@@ -8,8 +8,10 @@ interface PassengerInfoProps {
   initialData: {
     firstName: string
     lastName: string
+    lastNameMaternal:string
     email: string
     phone: string
+    birth_date: string
     documentType: string
     documentNumber: string
   }
@@ -44,6 +46,9 @@ const PassengerInfo = ({ initialData, onSubmit }: PassengerInfoProps) => {
     if (!formData.lastName.trim()) {
       newErrors.lastName = "El apellido es requerido"
     }
+    if (!formData.lastNameMaternal.trim()) {
+      newErrors.lastName = "El apellido es requerido"
+    }
 
     if (!formData.email.trim()) {
       newErrors.email = "El correo electrónico es requerido"
@@ -57,6 +62,10 @@ const PassengerInfo = ({ initialData, onSubmit }: PassengerInfoProps) => {
 
     if (!formData.documentNumber.trim()) {
       newErrors.documentNumber = "El número de documento es requerido"
+    }
+
+    if (!formData.birth_date.trim()) {
+      newErrors.birth_date = "El número de documento es requerido"
     }
 
     setErrors(newErrors)
@@ -108,6 +117,38 @@ const PassengerInfo = ({ initialData, onSubmit }: PassengerInfoProps) => {
             }`}
           />
           {errors.lastName && <p className="mt-1 text-sm text-red-500">{errors.lastName}</p>}
+        </div>
+        <div>
+          <label htmlFor="lastNameMaternal" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Apellido Materno
+          </label>
+          <input
+            type="text"
+            id="lastNameMaternal"
+            name="lastNameMaternal"
+            value={formData.lastNameMaternal}
+            onChange={handleChange}
+            className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
+              errors.lastNameMaternal ? "border-red-500 focus:ring-red-500" : "border-gray-300"
+            }`}
+          />
+          {errors.lastNameMaternal && <p className="mt-1 text-sm text-red-500">{errors.lastNameMaternal}</p>}
+        </div>
+        <div>
+          <label htmlFor="birth_date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Fecha de nacimiento
+          </label>
+          <input
+            type="date"
+            id="birth_date"
+            name="birth_date"
+            value={formData.birth_date}
+            onChange={handleChange}
+            className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
+              errors.birth_date ? "border-red-500 focus:ring-red-500" : "border-gray-300"
+            }`}
+          />
+          {errors.birth_date && <p className="mt-1 text-sm text-red-500">{errors.birth_date}</p>}
         </div>
       </div>
 

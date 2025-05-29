@@ -121,6 +121,22 @@ const ReservationForm = ({ flightId }: ReservationFormProps) => {
         throw new Error("Error al crear la reservación")
       }
 
+      const data=await response.json();
+      console.log('************')
+      console.log(data);
+      try{
+        const response = await fetch(`http://localhost:3000/api/v1/emails/sendReservation/${data.reservationId}`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${session?.accessToken}`,
+                },
+              })
+        console.log("Se envio el correo");
+      }catch(error){
+        console.error("Error al enviar datos de la reservación:", error)
+         alert("Ocurrió un error al procesar la reservación.")
+      }
       router.push(`/reserva/confirmacion?id=${flight?.flight_id}`)
     } catch (error) {
       console.error("Error al enviar la reservación:", error)

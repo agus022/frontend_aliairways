@@ -161,13 +161,13 @@ const Hero = () => {
                         </div>
                         <Combobox value={searchParams.destination} onChange={(value) => setSearchParams(prev => ({ ...prev, destination: value }))}>
                           <div className="relative">
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Origen</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Destino</label>
                             <div className="relative w-full">
                               <Combobox.Input
                                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                 onChange={(event) => handleChange({ target: { name: 'destination', value: event.target.value } } as any)}
                                 displayValue={(value: string) => value}
-                                placeholder="Ciudad de origen"
+                                placeholder="Ciudad de destino"
                               />
                               <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white dark:bg-gray-700 py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
                                 {filteredDestinations.length === 0 && searchParams.destination !== "" ? (

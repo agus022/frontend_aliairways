@@ -7,6 +7,8 @@ import { Save, Edit, Camera, User } from "lucide-react"
 export default function PersonalInfo() {
   const { data: session, status } = useSession()
   const [isEditing, setIsEditing] = useState(false)
+  const [profileImageUrl, setProfileImageUrl] = useState("");
+  const [profileImageAntUrl, setProfileImageAntUrl] = useState("");
   const [formData, setFormData] = useState({
     firstName: "",
     lastNamePaternal: "",
@@ -34,7 +36,11 @@ export default function PersonalInfo() {
             },
           })
           const data = await res.json()
-          const user = data[0]
+          const user = data[0];
+          console.log(data);
+          setProfileImageAntUrl(user.photo);
+          console.log("****************Ant");
+          console.log(profileImageAntUrl);
           setFormData({
             firstName: user.first_name || "",
             lastNamePaternal: user.last_name_paternal || "",
@@ -63,7 +69,7 @@ export default function PersonalInfo() {
     setIsEditing(false)
 
     try {
-      const res = await fetch(`http://localhost:3000/api/v1/passengers/${userMeta.passengerId}`, {
+      const res = await fetch(`http://localhost:3000/api/v1/passengers/${session.user.userId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -73,6 +79,7 @@ export default function PersonalInfo() {
           first_name: formData.firstName,
           last_name_maternal: formData.lastNameMaternal,
           last_name_paternal: formData.lastNamePaternal,
+          photo: profileImageUrl || null,
           birth_date: formData.dateOfBirth,
           passport: formData.passportNumber,
           phone: formData.phone,
@@ -89,6 +96,37 @@ export default function PersonalInfo() {
       console.error("Error en el PUT:", err)
     }
   }
+const UploadImage = () => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("image", file);
+    formData.append("userId",session.user.userId)
+
+    const res = await fetch("http://localhost:3000/api/v1/bucket/bucketImagen", {
+      method: "POST",
+      body: formData,
+      headers:{
+        Authorization: `Bearer ${session?.accessToken}`,
+      }
+    });
+
+    const data = await res.json();
+    console.log("URL de la imagen:", data.imageUrl);
+    setProfileImageUrl(data.imageUrl);
+
+  };
+
+  return (
+    <label className="cursor-pointer w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary/80 transition-colors">
+      <Camera className="w-4 h-4" />
+      <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+    </label>
+  );
+};
+
 
   return (
     <div>
@@ -107,13 +145,19 @@ export default function PersonalInfo() {
       {/* Foto de perfil */}
       <div className="flex items-center gap-4 mb-8">
         <div className="relative">
-          <div className="w-20 h-20 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center">
+          <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+          {profileImageUrl ? (
+            <img src={profileImageUrl} alt="Foto de perfil" className="w-full h-full object-cover" />
+          ) : profileImageAntUrl?(
+            <img src={profileImageAntUrl} alt="Foto de perfil" className="w-full h-full object-cover" />
+          ): (
             <User className="w-10 h-10 text-gray-400" />
-          </div>
+          )}
+        </div>
           {isEditing && (
-            <button className="absolute -bottom-1 -right-1 w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary/80 transition-colors">
-              <Camera className="w-4 h-4" />
-            </button>
+            <div className="absolute -bottom-1 -right-1">
+              <UploadImage />
+            </div>
           )}
         </div>
         <div>

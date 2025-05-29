@@ -1,101 +1,115 @@
-import type { Flight } from "@/types/flight"
-import { CalendarDays, Clock, Plane } from "lucide-react"
+"use client"
+import { CalendarDays, Clock, Plane, MapPin, DollarSign } from "lucide-react"
+import { useEffect, useState } from "react"
 
 interface FlightSummaryProps {
-  flight: Flight
-  totalPrice: number
+  flightId: number
 }
 
-const FlightSummary = ({ flight, totalPrice }: FlightSummaryProps) => {
-  // Formatear fecha
+const FlightSummary = ({ flightId }: FlightSummaryProps) => {
+  const [flight, setFlight] = useState<any>(null)
+  const [origin, setOrigin] = useState<any>(null)
+  const [destination, setDestination] = useState<any>(null)
+
+  useEffect(() => {
+    const fetchAllData = async () => {
+      try {
+        const resData = await fetch(`http://localhost:3000/api/v1/flights/${flightId}`)
+        const flightData = await resData.json()
+        setFlight(flightData)
+
+        const resOrigin = await fetch(`http://localhost:3000/api/v1/airports/${flightData.origin_id}`)
+        const originData = await resOrigin.json()
+        setOrigin(originData)
+
+        const resDest = await fetch(`http://localhost:3000/api/v1/airports/${flightData.destination_id}`)
+        const destinationData = await resDest.json()
+        setDestination(destinationData)
+      } catch (error) {
+        console.error("Error al cargar los datos:", error)
+      }
+    }
+
+    fetchAllData()
+  }, [flightId])
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     return date.toLocaleDateString("es-MX", {
-      weekday: "long",
+      weekday: "short",
       day: "numeric",
-      month: "long",
+      month: "short",
       year: "numeric",
     })
   }
 
-  // Formatear hora
-  const formatTime = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleTimeString("es-MX", {
-      hour: "2-digit",
-      minute: "2-digit",
-    })
+  const formatTime = (timeString: string) => {
+    const [hour, minute] = timeString.split(":")
+    return `${hour}:${minute}`
   }
 
-  // Formatear duración
-  const formatDuration = (minutes: number) => {
-    const hours = Math.floor(minutes / 60)
-    const mins = minutes % 60
-    return `${hours}h ${mins}m`
-  }
-
-  // Formatear precio
-  const formatPrice = (price: number, currency: string) => {
+  const formatPrice = (price: number) => {
     return new Intl.NumberFormat("es-MX", {
       style: "currency",
-      currency: currency,
+      currency: "MXN",
     }).format(price)
   }
 
+  if (!flight || !origin || !destination) {
+    return <div className="text-center text-gray-500 dark:text-gray-400">Cargando información del vuelo...</div>
+  }
+
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-      <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Resumen del Vuelo</h2>
+    <div className="w-full bg-gradient-to-br from-sky-900 to-indigo-800 text-white py-8 px-4 md:px-16 shadow-lg">
+      <h2 className="text-3xl font-bold mb-8 text-center">Resumen del Vuelo</h2>
 
-      <div className="mb-6">
-        <div className="flex items-center mb-2">
-          <CalendarDays className="w-5 h-5 text-primary mr-2" />
-          <span className="text-gray-700 dark:text-gray-300">{formatDate(flight.departureTime)}</span>
-        </div>
-
-        <div className="flex items-start mt-4">
-          <div className="min-w-[60px] text-right mr-3">
-            <div className="text-lg font-bold text-gray-900 dark:text-white">{formatTime(flight.departureTime)}</div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">{flight.departureAirport}</div>
+      <div className="grid md:grid-cols-2 gap-10">
+        <div className="space-y-6">
+          <div className="flex items-center text-cyan-300">
+            <CalendarDays className="w-6 h-6 mr-3" />
+            <span className="text-lg">{formatDate(flight.departure_date)}</span>
           </div>
 
-          <div className="flex flex-col items-center mx-2">
-            <div className="h-full border-l-2 border-dashed border-gray-300 dark:border-gray-600"></div>
-            <div className="my-1 text-xs text-gray-500 dark:text-gray-400 flex items-center">
-              <Clock className="w-3 h-3 mr-1" />
-              {formatDuration(flight.durationMinutes)}
+          <div className="flex items-center text-cyan-300">
+            <Clock className="w-6 h-6 mr-3" />
+            <span className="text-lg">{formatTime(flight.departure_time)} — {formatTime(flight.arrival_time)}</span>
+          </div>
+
+          <div className="flex items-center text-cyan-300">
+            <Plane className="w-6 h-6 mr-3" />
+            <span className="text-lg">Avión #{flight.aircraft_id}</span>
+          </div>
+
+          <div className="flex items-center text-cyan-300">
+            <DollarSign className="w-6 h-6 mr-3" />
+            <span className="text-lg font-semibold">{formatPrice(Number(flight.cost))}</span>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-center justify-center">
+          <div className="flex items-center space-x-6">
+            <div className="text-center">
+              <MapPin className="w-6 h-6 mx-auto text-pink-300" />
+              <p className="mt-1 text-sm font-semibold">{origin.name}</p>
+              <p className="text-xs text-pink-200">{origin.code}</p>
             </div>
-            <div className="h-full border-l-2 border-dashed border-gray-300 dark:border-gray-600"></div>
+
+            <div className="flex flex-col items-center text-white">
+              <div className="w-1 h-8 bg-white rounded-full"></div>
+              <Plane className="w-6 h-6 rotate-90" />
+              <div className="w-1 h-8 bg-white rounded-full"></div>
+            </div>
+
+            <div className="text-center">
+              <MapPin className="w-6 h-6 mx-auto text-pink-300" />
+              <p className="mt-1 text-sm font-semibold">{destination.name}</p>
+              <p className="text-xs text-pink-200">{destination.code}</p>
+            </div>
           </div>
 
-          <div className="min-w-[60px] ml-3">
-            <div className="text-lg font-bold text-gray-900 dark:text-white">{formatTime(flight.arrivalTime)}</div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">{flight.arrivalAirport}</div>
+          <div className="mt-6 text-sm italic text-center w-full text-gray-200">
+            Estado del vuelo: <span className="font-bold capitalize">{flight.status}</span>
           </div>
-        </div>
-
-        <div className="mt-4">
-          <div className="flex items-center mb-1">
-            <Plane className="w-4 h-4 text-gray-500 dark:text-gray-400 mr-2" />
-            <span className="text-gray-700 dark:text-gray-300">
-              {flight.airline} - {flight.flightNumber}
-            </span>
-          </div>
-          <div className="text-sm text-gray-500 dark:text-gray-400 ml-6">{flight.aircraft}</div>
-        </div>
-      </div>
-
-      <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-        <div className="flex justify-between mb-2">
-          <span className="text-gray-600 dark:text-gray-400">Tarifa base:</span>
-          <span className="text-gray-800 dark:text-gray-200">{formatPrice(flight.price, flight.currency)}</span>
-        </div>
-        <div className="flex justify-between mb-2">
-          <span className="text-gray-600 dark:text-gray-400">Impuestos y cargos:</span>
-          <span className="text-gray-800 dark:text-gray-200">{formatPrice(flight.taxes, flight.currency)}</span>
-        </div>
-        <div className="flex justify-between font-bold mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <span className="text-gray-900 dark:text-white">Total:</span>
-          <span className="text-primary">{formatPrice(totalPrice, flight.currency)}</span>
         </div>
       </div>
     </div>

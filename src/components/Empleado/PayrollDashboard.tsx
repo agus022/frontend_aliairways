@@ -1,450 +1,210 @@
 "use client"
 
-import { useState } from "react"
-import { DollarSign, Calendar, Download, Eye, TrendingUp, Clock } from "lucide-react"
+import { useState, useEffect } from "react"
+import { useSession } from "next-auth/react"
+import jsPDF from "jspdf"
+import autoTable from "jspdf-autotable"
+
+import {
+  DollarSign,
+  Banknote,
+  ArrowDownCircle,
+  ArrowUpCircle,
+  Calendar,
+  Download,
+  Eye,
+  Building2,
+} from "lucide-react"
+
+type Payroll = {
+  base_salary: string
+  bonus: string
+  deduction: string
+  net_salary: string
+  total_earnings: string
+  company: string
+  date_issued: string
+  period_start: string
+  period_end: string
+}
+
+type Employee = {
+  employee_id: string
+  first_name: string
+  title: string
+  salary: string
+}
 
 export default function PayrollDashboard() {
-  const [selectedPeriod, setSelectedPeriod] = useState("current")
+  const { data: session } = useSession()
+  const [employee, setEmployee] = useState<Employee | null>(null)
+  const [payrolls, setPayrolls] = useState<Payroll[]>([])
 
-  // Mock data para nómina
-  const payrollData = {
-    employee: {
-      name: "Carlos Mendoza",
-      id: "EMP-001",
-      position: "Piloto Comercial",
-      department: "Operaciones de Vuelo",
-      hireDate: "2020-03-15",
-    },
-    currentPeriod: {
-      period: "Febrero 2024",
-      startDate: "2024-02-01",
-      endDate: "2024-02-29",
-      payDate: "2024-03-05",
-      status: "processed",
-      grossSalary: 85000,
-      netSalary: 62750,
-      deductions: {
-        taxes: 15300,
-        socialSecurity: 4250,
-        healthInsurance: 2700,
-        total: 22250,
-      },
-      bonuses: {
-        flightHours: 8500,
-        performance: 5000,
-        punctuality: 2000,
-        total: 15500,
-      },
-      hours: {
-        regular: 160,
-        overtime: 24,
-        flight: 85,
-        standby: 16,
-      },
-    },
-    yearToDate: {
-      grossEarnings: 170000,
-      netEarnings: 125500,
-      totalDeductions: 44500,
-      totalBonuses: 31000,
-      totalHours: 368,
-      flightHours: 170,
-    },
-    payHistory: [
-      {
-        period: "Enero 2024",
-        payDate: "2024-02-05",
-        grossSalary: 85000,
-        netSalary: 62750,
-        status: "paid",
-      },
-      {
-        period: "Diciembre 2023",
-        payDate: "2024-01-05",
-        grossSalary: 90000,
-        netSalary: 66250,
-        status: "paid",
-      },
-      {
-        period: "Noviembre 2023",
-        payDate: "2023-12-05",
-        grossSalary: 85000,
-        netSalary: 62750,
-        status: "paid",
-      },
-    ],
-    benefits: [
-      {
-        name: "Seguro de vida",
-        coverage: "$500,000 MXN",
-        premium: "Pagado por la empresa",
-      },
-      {
-        name: "Seguro médico mayor",
-        coverage: "Familiar",
-        premium: "$2,700 MXN/mes",
-      },
-      {
-        name: "Fondo de ahorro",
-        coverage: "6% del salario",
-        premium: "Aportación patronal 6%",
-      },
-      {
-        name: "Vacaciones",
-        coverage: "20 días anuales",
-        premium: "Prima vacacional 25%",
-      },
-    ],
-  }
+  useEffect(() => {
+    const fetchPayrollData = async () => {
+      if (!session?.user?.userId || !session?.accessToken) return
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("es-MX", {
+      try {
+        const [payrollRes, employeeRes] = await Promise.all([
+          fetch(`http://localhost:3000/api/v1/payrolls/payrollsByEmployee/${session.user.userId}`, {
+            headers: { Authorization: `Bearer ${session.accessToken}` },
+          }),
+          fetch(`http://localhost:3000/api/v1/payrolls/dataEmployee/${session.user.userId}`, {
+            headers: { Authorization: `Bearer ${session.accessToken}` },
+          }),
+        ])
+
+        const [payrollData, employeeData] = await Promise.all([
+          payrollRes.json(),
+          employeeRes.json(),
+        ])
+
+        setPayrolls(payrollData)
+        setEmployee(employeeData)
+      } catch (error) {
+        console.error("Error fetching data:", error)
+      }
+    }
+
+    fetchPayrollData()
+  }, [session])
+
+  const formatCurrency = (value: number | string) =>
+    new Intl.NumberFormat("es-MX", {
       style: "currency",
       currency: "MXN",
-    }).format(amount)
-  }
+    }).format(Number(value))
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "processed":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-      case "pending":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
-      case "paid":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-      default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
-    }
-  }
+  const totalGross = payrolls.reduce((acc, p) => acc + parseFloat(p.total_earnings), 0)
+  const totalNet = payrolls.reduce((acc, p) => acc + parseFloat(p.net_salary), 0)
+  const totalBonuses = payrolls.reduce((acc, p) => acc + parseFloat(p.bonus), 0)
+  const totalDeductions = payrolls.reduce((acc, p) => acc + parseFloat(p.deduction), 0)
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case "processed":
-        return "Procesado"
-      case "pending":
-        return "Pendiente"
-      case "paid":
-        return "Pagado"
-      default:
-        return "Desconocido"
-    }
-  }
+  const generatePayrollPDF = (payroll: Payroll, index: number) => {
+  const doc = new jsPDF()
+  const title = `Recibo de Nómina - ${payroll.company}`
 
+  doc.setFontSize(16)
+  doc.text(title, 14, 20)
+
+  doc.setFontSize(12)
+  doc.text(`Periodo: ${new Date(payroll.period_start).toLocaleDateString()} - ${new Date(payroll.period_end).toLocaleDateString()}`, 14, 30)
+  doc.text(`Fecha de emisión: ${new Date(payroll.date_issued).toLocaleDateString()}`, 14, 38)
+ 
+  doc.setFontSize(15)
+  doc.text(`Empleado: ${employee.first_name}`, 14, 46)
+  
+  doc.setFontSize(16)
+  doc.text(`Trabajador en: ${employee.title}`, 14, 54)
+  
+  autoTable(doc, {
+    startY: 62,
+    head: [["Concepto", "Monto"]],
+    body: [
+      ["Salario base", formatCurrency(payroll.base_salary)],
+      ["Bonificación", formatCurrency(payroll.bonus)],
+      ["Deducción", `-${formatCurrency(payroll.deduction)}`],
+      ["Ganancias totales", formatCurrency(payroll.total_earnings)],
+      ["Salario neto", formatCurrency(payroll.net_salary)],
+      ["Empresa", payroll.company],
+    ],
+  })
+
+  doc.save(`nomina_${payroll.company}_${index + 1}.pdf`)
+}
+  const summaryCards = [
+    {
+      label: "Total Bruto",
+      value: formatCurrency(totalGross),
+      icon: DollarSign,
+      color: "text-green-600",
+    },
+    {
+      label: "Total Neto",
+      value: formatCurrency(totalNet),
+      icon: Banknote,
+      color: "text-blue-600",
+    },
+    {
+      label: "Bonificaciones",
+      value: formatCurrency(totalBonuses),
+      icon: ArrowUpCircle,
+      color: "text-emerald-500",
+    },
+    {
+      label: "Deducciones",
+      value: `-${formatCurrency(totalDeductions)}`,
+      icon: ArrowDownCircle,
+      color: "text-red-500",
+    },
+  ]
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Nómina</h1>
-            <p className="text-gray-600 dark:text-gray-300 mt-1">
-              {payrollData.employee.name} - {payrollData.employee.position}
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+          Nómina de Empleado
+          <Building2 className="w-6 h-6 text-primary" />
+        </h1>
+        {employee && (
+          <div className="mt-2 text-gray-600 dark:text-gray-300 space-y-1">
+            <p className="text-lg font-medium">
+              {employee.first_name} — {employee.title}
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              ID: {payrollData.employee.id} | Departamento: {payrollData.employee.department}
+              ID: {employee.employee_id} • Salario base: {formatCurrency(employee.salary)}
             </p>
           </div>
-          <div className="mt-4 md:mt-0">
-            <span
-              className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
-                payrollData.currentPeriod.status,
-              )}`}
-            >
-              {getStatusText(payrollData.currentPeriod.status)}
-            </span>
-          </div>
-        </div>
+        )}
       </div>
 
-      {/* Current Period Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
-              <DollarSign className="w-6 h-6 text-green-600 dark:text-green-400" />
+      {/* Resumen con iconos */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+        {summaryCards.map(({ label, value, icon: Icon, color }) => (
+          <div key={label} className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-5 flex items-center gap-4">
+            <div className={`p-3 rounded-full bg-gray-100 dark:bg-gray-700 ${color}`}>
+              <Icon className="w-6 h-6" />
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Salario Bruto</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {formatCurrency(payrollData.currentPeriod.grossSalary)}
-              </p>
+            <div>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
+              <p className="text-xl font-bold text-gray-900 dark:text-white">{value}</p>
             </div>
           </div>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-              <DollarSign className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Salario Neto</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {formatCurrency(payrollData.currentPeriod.netSalary)}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
-              <TrendingUp className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Bonificaciones</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {formatCurrency(payrollData.currentPeriod.bonuses.total)}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-orange-100 dark:bg-orange-900 rounded-lg">
-              <Clock className="w-6 h-6 text-orange-600 dark:text-orange-400" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Horas de Vuelo</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {payrollData.currentPeriod.hours.flight}
-              </p>
-            </div>
-          </div>
-        </div>
+        ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Current Period Details */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Período Actual</h2>
-            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-              <Calendar className="w-4 h-4" />
-              {payrollData.currentPeriod.period}
-            </div>
-          </div>
-
-          {/* Period Info */}
-          <div className="mb-6">
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <p className="text-gray-600 dark:text-gray-400">Inicio del período</p>
-                <p className="font-medium text-gray-900 dark:text-white">
-                  {new Date(payrollData.currentPeriod.startDate).toLocaleDateString("es-ES")}
+      {/* Historial de pagos */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+          <Calendar className="w-5 h-5" />
+          Historial de Pagos
+        </h2>
+        <div className="space-y-4">
+          {payrolls.map((p, idx) => (
+            <div key={idx} className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <div className="flex justify-between items-center mb-2">
+                <p className="text-base font-semibold text-gray-900 dark:text-white">
+                  {new Date(p.period_start).toLocaleDateString()} - {new Date(p.period_end).toLocaleDateString()}
+                </p>
+                <p className="text-sm text-gray-400">
+                  Emitido: {new Date(p.date_issued).toLocaleDateString()}
                 </p>
               </div>
-              <div>
-                <p className="text-gray-600 dark:text-gray-400">Fin del período</p>
-                <p className="font-medium text-gray-900 dark:text-white">
-                  {new Date(payrollData.currentPeriod.endDate).toLocaleDateString("es-ES")}
-                </p>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm text-gray-800 dark:text-gray-200">
+                <p>Salario base: {formatCurrency(p.base_salary)}</p>
+                <p>Bonificación: {formatCurrency(p.bonus)}</p>
+                <p>Deducción: -{formatCurrency(p.deduction)}</p>
+                <p>Total ganado: {formatCurrency(p.total_earnings)}</p>
+                <p>Salario neto: {formatCurrency(p.net_salary)}</p>
+                <p>Empresa: {p.company}</p>
               </div>
-              <div>
-                <p className="text-gray-600 dark:text-gray-400">Fecha de pago</p>
-                <p className="font-medium text-gray-900 dark:text-white">
-                  {new Date(payrollData.currentPeriod.payDate).toLocaleDateString("es-ES")}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Hours Breakdown */}
-          <div className="mb-6">
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Desglose de Horas</h3>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Horas regulares</span>
-                <span className="text-sm font-medium text-gray-900 dark:text-white">
-                  {payrollData.currentPeriod.hours.regular}h
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Horas extra</span>
-                <span className="text-sm font-medium text-gray-900 dark:text-white">
-                  {payrollData.currentPeriod.hours.overtime}h
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Horas de vuelo</span>
-                <span className="text-sm font-medium text-gray-900 dark:text-white">
-                  {payrollData.currentPeriod.hours.flight}h
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Standby</span>
-                <span className="text-sm font-medium text-gray-900 dark:text-white">
-                  {payrollData.currentPeriod.hours.standby}h
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Bonuses */}
-          <div className="mb-6">
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Bonificaciones</h3>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Horas de vuelo</span>
-                <span className="text-sm font-medium text-green-600">
-                  +{formatCurrency(payrollData.currentPeriod.bonuses.flightHours)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Rendimiento</span>
-                <span className="text-sm font-medium text-green-600">
-                  +{formatCurrency(payrollData.currentPeriod.bonuses.performance)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Puntualidad</span>
-                <span className="text-sm font-medium text-green-600">
-                  +{formatCurrency(payrollData.currentPeriod.bonuses.punctuality)}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Deductions */}
-          <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Deducciones</h3>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Impuestos</span>
-                <span className="text-sm font-medium text-red-600">
-                  -{formatCurrency(payrollData.currentPeriod.deductions.taxes)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Seguridad Social</span>
-                <span className="text-sm font-medium text-red-600">
-                  -{formatCurrency(payrollData.currentPeriod.deductions.socialSecurity)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Seguro médico</span>
-                <span className="text-sm font-medium text-red-600">
-                  -{formatCurrency(payrollData.currentPeriod.deductions.healthInsurance)}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Year to Date & History */}
-        <div className="space-y-6">
-          {/* Year to Date */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Acumulado del Año</h2>
-            <div className="space-y-4">
-              <div className="flex justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Ingresos brutos</span>
-                <span className="text-sm font-medium text-gray-900 dark:text-white">
-                  {formatCurrency(payrollData.yearToDate.grossEarnings)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Ingresos netos</span>
-                <span className="text-sm font-medium text-gray-900 dark:text-white">
-                  {formatCurrency(payrollData.yearToDate.netEarnings)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Total deducciones</span>
-                <span className="text-sm font-medium text-red-600">
-                  -{formatCurrency(payrollData.yearToDate.totalDeductions)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Total bonificaciones</span>
-                <span className="text-sm font-medium text-green-600">
-                  +{formatCurrency(payrollData.yearToDate.totalBonuses)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Horas de vuelo</span>
-                <span className="text-sm font-medium text-gray-900 dark:text-white">
-                  {payrollData.yearToDate.flightHours}h
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Pay History */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Historial de Pagos</h2>
-            <div className="space-y-4">
-              {payrollData.payHistory.map((payment, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
-                >
-                  <div>
-                    <p className="font-medium text-gray-900 dark:text-white">{payment.period}</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Pagado: {new Date(payment.payDate).toLocaleDateString("es-ES")}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-medium text-gray-900 dark:text-white">{formatCurrency(payment.netSalary)}</p>
-                    <div className="flex items-center gap-2">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(payment.status)}`}>
-                        {getStatusText(payment.status)}
-                      </span>
-                      <button className="text-primary hover:text-primary/80">
-                        <Eye className="w-4 h-4" />
-                      </button>
-                      <button className="text-primary hover:text-primary/80">
-                        <Download className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Benefits */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Beneficios</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {payrollData.benefits.map((benefit, index) => (
-            <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">{benefit.name}</h3>
-              <div className="space-y-1">
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Cobertura</span>
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">{benefit.coverage}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Prima</span>
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">{benefit.premium}</span>
-                </div>
+              <div className="flex items-center gap-2 mt-3">
+                <button onClick={() => generatePayrollPDF(p, idx)} className="text-blue-600 hover:text-blue-800 flex items-center gap-1 text-sm">
+                  <Download className="w-4 h-4" /> Descargar
+                </button>
               </div>
             </div>
           ))}
-        </div>
-      </div>
-
-      {/* Actions */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Acciones</h2>
-        <div className="flex flex-wrap gap-4">
-          <button className="flex items-center gap-2 bg-primary hover:bg-primary/80 text-white px-4 py-2 rounded-md font-medium transition duration-300">
-            <Download className="w-4 h-4" />
-            Descargar Recibo Actual
-          </button>
-          <button className="flex items-center gap-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 px-4 py-2 rounded-md font-medium transition duration-300">
-            <Eye className="w-4 h-4" />
-            Ver Detalles Completos
-          </button>
-          <button className="flex items-center gap-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 px-4 py-2 rounded-md font-medium transition duration-300">
-            <Calendar className="w-4 h-4" />
-            Historial Completo
-          </button>
         </div>
       </div>
     </div>

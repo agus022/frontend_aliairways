@@ -4,12 +4,14 @@
 
 
 import type React from "react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Search, Calendar, Users } from "lucide-react"
+import { Combobox } from "@headlessui/react"
 
 const Hero = () => {
   const router = useRouter()
+  const [city,setCity]=useState<any[]>([]);
   const [searchParams, setSearchParams] = useState({
     origin: "",
     destination: "",
@@ -17,6 +19,22 @@ const Hero = () => {
     returnDate: "",
     passengers: "1",
   })
+
+
+  useEffect(() => {
+  const fetchAllData = async () => {
+    try {
+      const res = await fetch('http://localhost:3000/api/v1/airports')
+      if (!res.ok) throw new Error("Error al cargar el turno")
+      const data = await res.json()
+      setCity(data)
+    } catch (error) {
+      console.error("Error en fetch de obtener citis")
+    }
+  }
+
+  fetchAllData()
+}, []) // <- Solo se ejecuta una vez al montar el componente
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -43,6 +61,23 @@ const Hero = () => {
     router.push(`/resultados-busqueda?${queryParams.toString()}`)
   }
 
+  const [filteredOrigins, setFilteredOrigins] = useState<any[]>([])
+
+  const [filteredDestinations, setFilteredDestinations] = useState<any[]>([])
+
+  useEffect(() => {
+    const filtered = city.filter(c =>
+      c.city.toLowerCase().includes(searchParams.origin.toLowerCase())
+    )
+    setFilteredOrigins(filtered)
+  }, [searchParams.origin, city])
+
+  useEffect(() => {
+    const filtered = city.filter(c =>
+      c.city.toLowerCase().includes(searchParams.destination.toLowerCase())
+    )
+    setFilteredDestinations(filtered)
+  }, [searchParams.destination, city])
   return (
     <>
       <section
@@ -73,51 +108,94 @@ const Hero = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     {/* Origen */}
                     <div className="relative">
-                      <label
-                        htmlFor="origin"
-                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                      >
-                        Origen
-                      </label>
+                      
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                           <Search className="h-5 w-5 text-gray-400" />
                         </div>
-                        <input
-                          type="text"
-                          id="origin"
-                          name="origin"
-                          value={searchParams.origin}
-                          onChange={handleChange}
-                          placeholder="Ciudad de origen"
-                          required
-                          className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                        />
+                        <Combobox value={searchParams.origin} onChange={(value) => setSearchParams(prev => ({ ...prev, origin: value }))}>
+                          <div className="relative">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Origen</label>
+                            <div className="relative w-full">
+                              <Combobox.Input
+                                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                onChange={(event) => handleChange({ target: { name: 'origin', value: event.target.value } } as any)}
+                                displayValue={(value: string) => value}
+                                placeholder="Ciudad de origen"
+                              />
+                              <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white dark:bg-gray-700 py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                                {filteredOrigins.length === 0 && searchParams.origin !== "" ? (
+                                  <div className="cursor-default select-none px-4 py-2 text-gray-700">No se encontraron coincidencias.</div>
+                                ) : (
+                                  filteredOrigins.map((item) => (
+                                    <Combobox.Option
+                                      key={item.airport_id}
+                                      value={item.city}
+                                      className={({ active }) =>
+                                        `cursor-pointer select-none relative py-2 pl-10 pr-4 ${active ? 'bg-primary text-white' : 'text-gray-900 dark:text-white'}`
+                                      }
+                                    >
+                                      {({ selected }) => (
+                                        <>
+                                          <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
+                                            {item.city} ({item.code})
+                                          </span>
+                                        </>
+                                      )}
+                                    </Combobox.Option>
+                                  ))
+                                )}
+                              </Combobox.Options>
+                            </div>
+                          </div>
+                        </Combobox>
+
                       </div>
                     </div>
 
                     {/* Destino */}
                     <div className="relative">
-                      <label
-                        htmlFor="destination"
-                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                      >
-                        Destino
-                      </label>
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                           <Search className="h-5 w-5 text-gray-400" />
                         </div>
-                        <input
-                          type="text"
-                          id="destination"
-                          name="destination"
-                          value={searchParams.destination}
-                          onChange={handleChange}
-                          placeholder="Ciudad de destino"
-                          required
-                          className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                        />
+                        <Combobox value={searchParams.destination} onChange={(value) => setSearchParams(prev => ({ ...prev, destination: value }))}>
+                          <div className="relative">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Origen</label>
+                            <div className="relative w-full">
+                              <Combobox.Input
+                                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                onChange={(event) => handleChange({ target: { name: 'destination', value: event.target.value } } as any)}
+                                displayValue={(value: string) => value}
+                                placeholder="Ciudad de origen"
+                              />
+                              <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white dark:bg-gray-700 py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                                {filteredDestinations.length === 0 && searchParams.destination !== "" ? (
+                                  <div className="cursor-default select-none px-4 py-2 text-gray-700">No se encontraron coincidencias.</div>
+                                ) : (
+                                  filteredDestinations.map((item) => (
+                                    <Combobox.Option
+                                      key={item.airport_id}
+                                      value={item.city}
+                                      className={({ active }) =>
+                                        `cursor-pointer select-none relative py-2 pl-10 pr-4 ${active ? 'bg-primary text-white' : 'text-gray-900 dark:text-white'}`
+                                      }
+                                    >
+                                      {({ selected }) => (
+                                        <>
+                                          <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
+                                            {item.city} ({item.code})
+                                          </span>
+                                        </>
+                                      )}
+                                    </Combobox.Option>
+                                  ))
+                                )}
+                              </Combobox.Options>
+                            </div>
+                          </div>
+                        </Combobox>
+
                       </div>
                     </div>
                   </div>

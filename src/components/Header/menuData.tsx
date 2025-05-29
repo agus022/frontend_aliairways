@@ -48,7 +48,12 @@ export const menusByRole: Record<string, Menu[]> = {
       ],
     },
   ],
-
+  employee: [
+    { id: 1, title: "Nomina", path: "/empleado/nomina", newTab: false },
+    { id: 2, title: "Mis Vuelos", path: "/empleado/vuelos", newTab: false },
+    { id: 3, title: "Horario", path: "/empleado/horario", newTab: false },
+    { id: 4, title: "Equipaje", path: "/empleado/equipaje", newTab: false }
+  ]
 };
 
 export default menusByRole;

@@ -1,286 +1,324 @@
+
 'use client';
 
-import { useState,useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
-
-const dummyEmployees = Array.from({ length: 123 }, (_, i) => ({
-  id: i + 1,
-  first_name: `Empleado ${i + 1}`,
-  last_name_paternal: 'Pérez',
-  last_name_maternal: 'López',
-  passport: `AB1234${i}`,
-  curp: `CURP${i}`,
-  rfc: `RFC${i}`,
-  birth_date: '1990-01-01',
-  job_id: `${(i % 5) + 1}`,
-  shift_id: `${(i % 3) + 1}`,
-  user_id: `${i + 10}`,
-}));
-
-
+import { getSession } from 'next-auth/react';
 
 export default function EmployeeListPage() {
-    const [showModal, setShowModal] = useState(false);
-    const toggleModal = () => setShowModal(!showModal);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [searchTerm, setSearchTerm] = useState('');
+  const [employees, setEmployees] = useState([]);
+  const [jobs, setJobs] = useState([]);
+  const [shifts, setShifts] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [form, setForm] = useState(initialForm());
+  const [editMode, setEditMode] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pendingFlights, setPendingFlights] = useState([]);
+  const [selectedEmployee, setSelectedEmployee] = useState('');
+  const [selectedFlight, setSelectedFlight] = useState('');
 
-    const itemsPerPage = 20;
- const filteredEmployees = dummyEmployees.filter((emp) =>
-  `${emp.first_name} ${emp.last_name_paternal} ${emp.last_name_maternal}`.toLowerCase().includes(searchTerm.toLowerCase())
-);
+  const itemsPerPage = 20;
 
-const totalPages = Math.ceil(filteredEmployees.length / itemsPerPage);
+  function initialForm() {
+    return {
+      job_id: '',
+      shift_id: '',
+      first_name: '',
+      last_name_paternal: '',
+      last_name_maternal: '',
+      passport: '',
+      curp: '',
+      rfc: '',
+      birth_date: '',
+      user_id: '',
+    };
+  }
 
-const currentEmployees = filteredEmployees.slice(
-  (currentPage - 1) * itemsPerPage,
-  currentPage * itemsPerPage
-);
-  
-    useEffect(() => {
-    if (showModal) {
-        document.body.classList.add('modal-open');
-    } else {
-        document.body.classList.remove('modal-open');
+  const fetchAllData = async () => {
+const session = await getSession();
+  const headers = { Authorization: `Bearer ${session?.accessToken}` };
+
+  const [empRes, jobRes, shiftRes, userRes, flightRes] = await Promise.all([
+    fetch('http://localhost:3000/api/v1/employees', { headers }),
+    fetch('http://localhost:3000/api/v1/jobs', { headers }),
+    fetch('http://localhost:3000/api/v1/shifts', { headers }),
+    fetch('http://localhost:3000/api/v1/users', { headers }),
+    fetch('http://localhost:3000/api/v1/flights', { headers }),
+  ]);
+
+  const allFlights = await flightRes.json();
+  const filteredFlights = allFlights.filter(f => f.status === 'pendiente');
+
+  setEmployees(await empRes.json());
+  setJobs(await jobRes.json());
+  setShifts(await shiftRes.json());
+  setUsers(await userRes.json());
+  setPendingFlights(filteredFlights);
+  };
+
+  useEffect(() => {
+    fetchAllData();
+  }, []);
+
+  const toggleModal = () => {
+    setShowModal(!showModal);
+    if (!showModal) {
+      setForm(initialForm());
+      setEditMode(false);
+      setEditingId(null);
     }
-    }, [showModal]);
+  };
 
-  
+  const handleSave = async (e) => {
+    const bodyData = {
+      ...form,
+      job_id: parseInt(form.job_id),
+      shift_id: parseInt(form.shift_id),
+      user_id: parseInt(form.user_id),
+    };
+    e.preventDefault();
+    const session = await getSession();
+    const method = editMode ? 'PUT' : 'POST';
+    const url = editMode
+      ? `http://localhost:3000/api/v1/employees/${editingId}`
+      : 'http://localhost:3000/api/v1/employees';
+
+    await fetch(url, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session?.accessToken}`,
+      },
+      body: JSON.stringify(bodyData),
+    });
+
+    toggleModal();
+    fetchAllData();
+  };
+
+  const handleEdit = (emp) => {
+    setForm({ ...emp });
+    setEditingId(emp.employee_id);
+    setEditMode(true);
+    setShowModal(true);
+  };
+
+  const handleDelete = async (id) => {
+    const session = await getSession();
+    await fetch(`http://localhost:3000/api/v1/employees/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${session?.accessToken}` },
+    });
+    fetchAllData();
+  };
+
+
+  const handleAssignEmployeeToFlight = async () => {
+  if (!selectedEmployee || !selectedFlight) return;
+
+  const session = await getSession();
+  await fetch(`http://localhost:3000/api/v1/employees/flight-employees`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${session?.accessToken}`,
+    },
+    body: JSON.stringify({
+      employee_id: selectedEmployee,
+      flight_id: selectedFlight,
+    }),
+  });
+
+  setSelectedEmployee('');
+  setSelectedFlight('');
+  fetchAllData();
+};
+
+
+ const getJobTitle = (id) => jobs.find(j => j.job_id === parseInt(id))?.title || '';
+const getShiftDescription = (id) => shifts.find(s => s.shift_id === parseInt(id))?.shift_desc || '';
+const getUserEmail = (id) => users.find(u => u.user_id === parseInt(id))?.email || '';
+
+  const filtered = employees.filter((e) =>
+    `${e.first_name} ${e.last_name_paternal} ${e.last_name_maternal}`
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const currentEmployees = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  //FORMATEAR FECHA
+  const formatDate = (isoString) => {
+    if (!isoString) return '';
+    const date = new Date(isoString);
+    return new Intl.DateTimeFormat('es-MX', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(date);
+  };
 
   return (
-    <section className="relative z-10 overflow-hidden pt-24 pb-10">
+    <section className="pt-24 pb-10">
       <div className="container">
-        <div className="flex justify-between items-center mb-6 px-4">
-          <h2 className="text-2xl font-bold text-black dark:text-white">Empleados</h2>
-          <div className="w-full md:w-1/3">
-            <input
-                type="text"
-                placeholder="Buscar empleado..."
-                value={searchTerm}
-                onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1); // Reinicia paginación al buscar
-                }}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xs bg-[#f8f8f8] dark:bg-[#1F2937] text-sm text-gray-800 dark:text-white"
-            />
-            </div>
-          <button
-            onClick={toggleModal}
-            className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-xs hover:bg-primary/90 transition"
-          >
-            <FaPlus />
-            Registrar nuevo empleado
+        <div className="flex justify-between mb-6 px-4">
+          <h2 className="text-2xl font-bold">Empleados</h2>
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="px-4 py-2 border rounded"
+            placeholder="Buscar empleado..."
+          />
+          <button onClick={toggleModal} className="bg-primary text-white px-4 py-2 rounded flex items-center gap-2">
+            <FaPlus /> Registrar nuevo empleado
           </button>
         </div>
 
-        <div className="overflow-x-auto rounded shadow-three bg-white dark:bg-[#2C303B] mx-4 ">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-100 dark:bg-[#1F2937]">
+        <div className="overflow-x-auto bg-white rounded shadow mx-4">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-100">
               <tr>
-                {[
-                  'Nombre',
-                  'Ap. Paterno',
-                  'Ap. Materno',
-                  'Pasaporte',
-                  'CURP',
-                  'RFC',
-                  'Nacimiento',
-                  'Trabajo',
-                  'Turno',
-                  'Usuario',
-                  'Acciones',
-                ].map((head) => (
-                  <th
-                    key={head}
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase"
-                  >
-                    {head}
-                  </th>
+                {["Nombre", "Ap. Paterno", "Ap. Materno", "Pasaporte", "CURP", "RFC", "Nacimiento", "Trabajo", "Turno", "Correo", "Acciones"].map((h) => (
+                  <th key={h} className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              {currentEmployees.map((emp) => (
-                <tr key={emp.id}>
-                  <td className="px-6 py-4 text-body-color dark:text-white">{emp.first_name}</td>
-                  <td className="px-6 py-4 text-body-color dark:text-white">{emp.last_name_paternal}</td>
-                  <td className="px-6 py-4 text-body-color dark:text-white">{emp.last_name_maternal}</td>
-                  <td className="px-6 py-4 text-body-color dark:text-white">{emp.passport}</td>
-                  <td className="px-6 py-4 text-body-color dark:text-white">{emp.curp}</td>
-                  <td className="px-6 py-4 text-body-color dark:text-white">{emp.rfc}</td>
-                  <td className="px-6 py-4 text-body-color dark:text-white">{emp.birth_date}</td>
-                  <td className="px-6 py-4 text-body-color dark:text-white">{emp.job_id}</td>
-                  <td className="px-6 py-4 text-body-color dark:text-white">{emp.shift_id}</td>
-                  <td className="px-6 py-4 text-body-color dark:text-white">{emp.user_id}</td>
-                  <td className="px-6 py-4">
-                    <div className="flex gap-2">
-                      <button className="text-yellow-500 hover:text-yellow-600">
-                        <FaEdit />
-                      </button>
-                      <button className="text-red-500 hover:text-red-600">
-                        <FaTrash />
-                      </button>
-                    </div>
+            <tbody>
+              {currentEmployees.map((e) => (
+                <tr key={e.employee_id}>
+                  <td className="px-6 py-2">{e.first_name}</td>
+                  <td className="px-6 py-2">{e.last_name_paternal}</td>
+                  <td className="px-6 py-2">{e.last_name_maternal}</td>
+                  <td className="px-6 py-2">{e.passport}</td>
+                  <td className="px-6 py-2">{e.curp}</td>
+                  <td className="px-6 py-2">{e.rfc}</td>
+                  <td className="px-6 py-2">{formatDate(e.birth_date)}</td>
+                  <td className="px-6 py-2">{getJobTitle(e.job_id)}</td>
+                  <td className="px-6 py-2">{getShiftDescription(e.shift_id)}</td>
+                  <td className="px-6 py-2">{getUserEmail(e.user_id)}</td>
+                  <td className="px-6 py-2 flex gap-2">
+                    <button className="text-yellow-500" onClick={() => handleEdit(e)}><FaEdit /></button>
+                    <button className="text-red-500" onClick={() => handleDelete(e.employee_id)}><FaTrash /></button>
                   </td>
                 </tr>
               ))}
             </tbody>
-          </table>
-
-        <div className="flex justify-between items-center mt-4 px-6">
-            <button
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                className="px-4 py-2 rounded-xs bg-gray-200 dark:bg-[#1F2937] text-sm font-medium disabled:opacity-50"
-            >
-                ← Anterior
-            </button>
-
-            <p className="text-sm text-body-color dark:text-white">
-                Página {currentPage} de {totalPages}
-            </p>
-
-            <button
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
-                className="px-4 py-2 rounded-xs bg-gray-200 dark:bg-[#1F2937] text-sm font-medium disabled:opacity-50"
-            >
-                Siguiente →
-            </button>
-            </div>
-
-
-            
+          </table>        
+          
+          <div className="flex justify-between mt-4 px-6">
+          <button onClick={() => setCurrentPage(p => Math.max(p - 1, 1))} disabled={currentPage === 1} className="px-4 py-2 rounded bg-gray-200">← Anterior</button>
+          <p>Página {currentPage} de {totalPages}</p>
+          <button onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages} className="px-4 py-2 rounded bg-gray-200">Siguiente →</button>
+        </div>
         </div>
 
-        <div className="mt-10 mx-4 bg-white dark:bg-[#2C303B] rounded-xs shadow-three p-6">
+        <div className="mt-10 mx-4 bg-white dark:bg-[#2C303B] rounded-sm shadow-three p-6">
   <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
-    Asignar empleado a vuelo
+    Asignar empleado a vuelo (pendiente)
   </h3>
-  {/* asginacion de empleados a vuelos */}
-<div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-  {/* Selector de empleado */}
-  <div>
-    <label className="text-sm text-gray-600 dark:text-gray-300 mb-1 block">Seleccionar empleado</label>
-    <select
-      disabled
-      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xs bg-[#f8f8f8] dark:bg-[#1F2937] text-sm text-gray-800 dark:text-white"
-    >
-      <option>-- Empleado --</option>
-      <option>Carlos Pérez</option>
-      <option>Laura Ramírez</option>
-    </select>
-  </div>
-
-      <div className="flex justify-center items-center">
-    <span className="text-blue-600 text-1xl font-bold">←→</span>
-  </div>
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div>
+      <label className="text-sm mb-1 text-gray-700 dark:text-white block">Empleado</label>
+      <select
+        value={selectedEmployee}
+        onChange={(e) => setSelectedEmployee(e.target.value)}
+        className="w-full px-4 py-2 border rounded bg-[#f8f8f8] dark:bg-[#1F2937]"
+      >
+        <option value="">Selecciona un empleado</option>
+        {employees.map((emp) => (
+          <option key={emp.employee_id} value={emp.employee_id}>
+            {emp.first_name} {emp.last_name_paternal} {emp.last_name_maternal}
+          </option>
+        ))}
+      </select>
+    </div>
 
     <div>
-    <label className="text-sm text-gray-600 dark:text-gray-300 mb-1 block">Seleccionar vuelo</label>
-    <select
-      disabled
-      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xs bg-[#f8f8f8] dark:bg-[#1F2937] text-sm text-gray-800 dark:text-white"
-    >
-      <option>-- Vuelo --</option>
-      <option>Vuelo 101 - CDMX → Cancún</option>
-      <option>Vuelo 202 - Guadalajara → Monterrey</option>
-    </select>
-  </div>
-  </div>
+      <label className="text-sm mb-1 text-gray-700 dark:text-white block">Vuelo (pendiente)</label>
+      <select
+        value={selectedFlight}
+        onChange={(e) => setSelectedFlight(e.target.value)}
+        className="w-full px-4 py-2 border rounded bg-[#f8f8f8] dark:bg-[#1F2937]"
+      >
+        <option value="">Selecciona un vuelo</option>
+        {pendingFlights.map((flight) => (
+          <option key={flight.flight_id} value={flight.flight_id}>
+            Vuelo #{flight.flight_id}
+          </option>
+        ))}
+      </select>
+    </div>
 
-  <div className="mt-6 text-right">
-    <button
-      disabled
-      className="bg-primary text-white px-6 py-2 rounded-xs hover:bg-primary/90 transition disabled:opacity-50"
-    >
-      Asignar
-    </button>
+    <div className="flex items-end">
+      <button
+        onClick={handleAssignEmployeeToFlight}
+        className="w-full bg-primary text-white px-6 py-2 rounded hover:bg-primary/90"
+      >
+        Asignar
+      </button>
+    </div>
   </div>
 </div>
 
 
-        {/* Modal */}
-{showModal && (
-<>
-  <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" onClick={toggleModal} />
-  
-  <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto px-4 py-8">
-    <div className="relative w-full max-w-3xl rounded-sm bg-white dark:bg-[#2C303B] p-6 shadow-three">
-      <button
-        onClick={toggleModal}
-        className="absolute top-3 right-3 text-gray-500 hover:text-red-500"
-      >
-        ✕
-      </button>
-      <h2 className="text-xl font-semibold mb-4 text-black dark:text-white">
-        Registrar nuevo empleado
-      </h2>
-      <EmployeeForm />
-    </div>
-  </div>
-</>
-)}
+
+
+        {showModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            <div className="bg-white dark:bg-[#2C303B] p-6 rounded max-w-2xl w-full relative">
+              <button onClick={toggleModal} className="absolute top-3 right-3 text-gray-500 hover:text-red-500">✕</button>
+              <h3 className="text-lg font-semibold mb-4 text-black dark:text-white">{editMode ? 'Actualizar empleado' : 'Registrar empleado'}</h3>
+              <form onSubmit={handleSave} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {Object.entries({
+                  first_name: 'Nombre(s)',
+                  last_name_paternal: 'Apellido paterno',
+                  last_name_maternal: 'Apellido materno',
+                  passport: 'Pasaporte',
+                  curp: 'CURP',
+                  rfc: 'RFC',
+                  birth_date: 'Fecha nacimiento',
+                }).map(([name, label]) => (
+                  <div key={name}>
+                    <label className="block text-sm mb-1">{label}</label>
+                    <input type={name === 'birth_date' ? 'date' : 'text'} name={name} value={form[name]} onChange={(e) => setForm({ ...form, [name]: e.target.value })} className="w-full px-4 py-2 border rounded bg-[#f8f8f8] dark:bg-[#1F2937]" required />
+                  </div>
+                ))}
+
+                <div>
+                  <label className="block text-sm mb-1">Trabajo</label>
+                  <select value={form.job_id} onChange={(e) => setForm({ ...form, job_id: e.target.value })} className="w-full px-4 py-2 border rounded">
+                    <option value=''>Selecciona un trabajo</option>
+                    {jobs.map(j => <option key={j.job_id} value={j.job_id}>{j.title}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm mb-1">Turno</label>
+                  <select value={form.shift_id} onChange={(e) => setForm({ ...form, shift_id: e.target.value })} className="w-full px-4 py-2 border rounded">
+                    <option value=''>Selecciona un turno</option>
+                    {shifts.map(s => <option key={s.shift_id} value={s.shift_id}>{`${s.shift_desc} (${s.start_time} - ${s.end_time})`}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm mb-1">Usuario</label>
+                  <select value={form.user_id} onChange={(e) => setForm({ ...form, user_id: e.target.value })} className="w-full px-4 py-2 border rounded">
+                    <option value=''>Selecciona un usuario</option>
+                    {users.map(u => <option key={u.user_id} value={u.user_id}>{u.email}</option>)}
+                  </select>
+                </div>
+
+                <div className="col-span-2 text-right">
+                  <button type="submit" className="bg-primary text-white px-6 py-2 rounded hover:bg-primary/90">{editMode ? 'Actualizar' : 'Guardar'} empleado</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </section>
-  );
-}
-
-function EmployeeForm() {
-  const [form, setForm] = useState({
-    job_id: '',
-    shift_id: '',
-    first_name: '',
-    last_name_paternal: '',
-    last_name_maternal: '',
-    passport: '',
-    curp: '',
-    rfc: '',
-    birth_date: '',
-    user_id: '',
-  });
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  return (
-    <form className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {[
-        { name: 'first_name', label: 'Nombre(s)' },
-        { name: 'last_name_paternal', label: 'Apellido paterno' },
-        { name: 'last_name_maternal', label: 'Apellido materno' },
-        { name: 'passport', label: 'Pasaporte' },
-        { name: 'curp', label: 'CURP' },
-        { name: 'rfc', label: 'RFC' },
-        { name: 'birth_date', label: 'Fecha de nacimiento', type: 'date' },
-        { name: 'user_id', label: 'ID de usuario' },
-        { name: 'job_id', label: 'ID de trabajo' },
-        { name: 'shift_id', label: 'ID de turno' },
-      ].map(({ name, label, type }) => (
-        <div key={name}>
-          <label htmlFor={name} className="text-sm mb-1 block text-gray-700 dark:text-white">
-            {label}
-          </label>
-          <input
-            type={type || 'text'}
-            name={name}
-            value={form[name as keyof typeof form]}
-            onChange={handleChange}
-            placeholder={label}
-            className="border-stroke dark:text-body-color-dark dark:shadow-two text-body-color focus:border-primary dark:focus:border-primary w-full rounded-xs border bg-[#f8f8f8] px-4 py-2 text-base outline-none transition-all duration-300 dark:border-transparent dark:bg-[#1F2937] dark:focus:shadow-none"
-          />
-        </div>
-      ))}
-
-      <div className="col-span-1 md:col-span-2">
-        <button
-          type="submit"
-          className="mt-4 bg-primary text-white px-6 py-3 rounded-xs hover:bg-primary/90 transition"
-        >
-          Guardar empleado
-        </button>
-      </div>
-    </form>
   );
 }

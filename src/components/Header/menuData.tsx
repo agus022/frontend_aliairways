@@ -44,10 +44,9 @@ export const menusByRole: Record<string, Menu[]> = {
         { id: 41, title: "Vuelos", path: "/views/admin/flights", newTab: false },
         { id: 42, title: "Aeropuertos", path: "/views/admin/airports", newTab: false },
         { id: 43, title: "Aeronaves", path: "/views/admin/aircrafts", newTab: false },
+        { id: 43, title: "Asientos", path: "/views/admin/seats", newTab: false },
       ],
     },
-    { id: 5, title: "Reservaciones", path: "/views/admin/reservations", newTab: false },
-    { id: 6, title: "Equipaje", path: "/views/admin/baggage", newTab: false },
   ],
 
 };

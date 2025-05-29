@@ -124,23 +124,29 @@ export default function FlightsPage() {
     fetchFlights();
   };
 
-  const handleEdit = (flight) => {
-    setEditMode(true);
-    setShowModal(true);
-    setEditingFlightId(flight.flight_id);
-    setForm({
-      aircraft_id: String(flight.aircraft_id),
-    origin_id: String(flight.origin_id),
-    destination_id: String(flight.destination_id),
-    departure_date: flight.departure_date.split('T')[0], // "YYYY-MM-DD"
+const handleEdit = (flight) => {
+  // Buscar ID de aeronave por modelo
+  const aircraft = aircraftOptions.find((a) => a.model === flight.aircraft_model);
+  const origin = airportOptions.find((ap) => ap.code === flight.departure_airport_code);
+  const destination = airportOptions.find((ap) => ap.code === flight.arrival_airport_code);
+
+  setForm({
+    aircraft_id: aircraft ? String(aircraft.aircraft_id) : '',
+    origin_id: origin ? String(origin.airport_id) : '',
+    destination_id: destination ? String(destination.airport_id) : '',
+    departure_date: flight.departure_date.split('T')[0],
     arrival_date: flight.arrival_date.split('T')[0],
-    departure_time: flight.departure_time.slice(0, 5), // "HH:MM"
+    departure_time: flight.departure_time.slice(0, 5),
     arrival_time: flight.arrival_time.slice(0, 5),
     status: flight.status,
     cost: flight.cost,
     location: flight.location || '',
-    });
-  };
+  });
+
+  setEditingFlightId(flight.flight_id);
+  setEditMode(true);
+  setShowModal(true);
+};
 
   const handleDelete = async (id) => {
     const session = await getSession();
@@ -304,7 +310,7 @@ export default function FlightsPage() {
         <h2 className="text-xl font-semibold mb-4 text-black dark:text-white">
           {editMode ? 'Actualizar vuelo' : 'Crear nuevo vuelo'}
         </h2>
-
+          {/* <pre className="text-xs text-red-500">{JSON.stringify(form, null, 2)}</pre> */}
         <form onSubmit={handleCreateOrUpdate} className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Aeronave */}
 <div>
@@ -353,7 +359,7 @@ export default function FlightsPage() {
   >
     <option value="">Selecciona un aeropuerto</option>
     {airportOptions.map((ap) => (
-      <option key={ap.airport_id} value={ap.airport_id}>
+      <option key={ap.airport_id} value={String(ap.airport_id)}>
         {ap.code} - {ap.city}
       </option>
     ))}

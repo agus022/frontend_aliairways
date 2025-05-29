@@ -647,7 +647,7 @@ const EmployeeStatsSection = () => {
         </div>
         <div className="bg-white p-6 rounded shadow">
           <h3 className="text-sm text-gray-500 mb-1">Pilotos</h3>
-          <p className="text-3xl font-bold text-red-500">{employeeSummary.pilots.toLocaleString()}</p>
+          <p className="text-3xl font-bold mb-1">{employeeSummary.pilots.toLocaleString()}</p>
           <p className="text-gray-600 text-sm">Especialistas en aviación</p>
         </div>
         <div className="bg-white p-6 rounded shadow">

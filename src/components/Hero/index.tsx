@@ -24,7 +24,7 @@ const Hero = () => {
   useEffect(() => {
   const fetchAllData = async () => {
     try {
-      const res = await fetch('http://localhost:3000/api/v1/airports')
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/airports`)
       if (!res.ok) throw new Error("Error al cargar el turno")
       const data = await res.json()
       setCity(data)

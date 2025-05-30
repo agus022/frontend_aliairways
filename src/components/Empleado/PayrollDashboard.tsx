@@ -46,10 +46,10 @@ export default function PayrollDashboard() {
 
       try {
         const [payrollRes, employeeRes] = await Promise.all([
-          fetch(`http://localhost:3000/api/v1/payrolls/payrollsByEmployee/${session.user.userId}`, {
+          fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/payrolls/payrollsByEmployee/${session.user.userId}`, {
             headers: { Authorization: `Bearer ${session.accessToken}` },
           }),
-          fetch(`http://localhost:3000/api/v1/payrolls/dataEmployee/${session.user.userId}`, {
+          fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/payrolls/dataEmployee/${session.user.userId}`, {
             headers: { Authorization: `Bearer ${session.accessToken}` },
           }),
         ])

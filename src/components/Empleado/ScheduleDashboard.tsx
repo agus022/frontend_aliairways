@@ -12,7 +12,7 @@ export default function ScheduleDashboard() {
     if (session?.user?.userId && session?.accessToken) {
       const fetchTurno = async () => {
         try {
-          const res = await fetch(`http://localhost:3000/api/v1/shifts/employee/horario/${session.user.userId}`, {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/shifts/employee/horario/${session.user.userId}`, {
             headers: {
               Authorization: `Bearer ${session.accessToken}`,
             },

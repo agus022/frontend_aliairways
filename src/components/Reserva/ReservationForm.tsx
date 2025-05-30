@@ -40,7 +40,7 @@ const ReservationForm = ({ flightId }: ReservationFormProps) => {
     const fetchSeats = async () => {
       if (session?.user?.userId && session?.accessToken) {
         try {
-          const res = await fetch(`http://localhost:3000/api/v1/seats/getSeatFlight/${flightId}`, {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/seats/getSeatFlight/${flightId}`, {
             headers: {
               Authorization: `Bearer ${session.accessToken}`
             }
@@ -54,7 +54,7 @@ const ReservationForm = ({ flightId }: ReservationFormProps) => {
           console.error("Error al obtener los asientos:", error);
         }
         try {
-          const resData = await fetch(`http://localhost:3000/api/v1/flights/${flightId}`)
+          const resData = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/flights/${flightId}`)
           const flightData = await resData.json()
           setFlight(flightData)
         } catch (error) {
@@ -108,7 +108,7 @@ const ReservationForm = ({ flightId }: ReservationFormProps) => {
         seat_id: selectedSeat.seat_id,
       }
 
-      const response = await fetch("http://localhost:3000/api/v1/reservations/crear_reservacion", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/reservations/crear_reservacion`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -125,7 +125,7 @@ const ReservationForm = ({ flightId }: ReservationFormProps) => {
       console.log('************')
       console.log(data);
       try{
-        const response = await fetch(`http://localhost:3000/api/v1/emails/sendReservation/${data.reservationId}`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/emails/sendReservation/${data.reservationId}`, {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",

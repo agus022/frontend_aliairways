@@ -19,7 +19,7 @@ export default function BaggageManagement() {
     if (session?.user?.userId && session?.accessToken) {
       const fetchAllData= async () => {
         try {
-          const res = await fetch(`http://localhost:3000/api/v1/luggages/avgLuggageByEmployee`, {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/luggages/avgLuggageByEmployee`, {
             headers: {
               Authorization: `Bearer ${session.accessToken}`,
             },
@@ -31,7 +31,7 @@ export default function BaggageManagement() {
           console.error("Error fetching turno:", error)
         }
         try {
-          const res = await fetch(`http://localhost:3000/api/v1/luggages/totalLuggageOverByEmployee/${session.user.userId}`, {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/luggages/totalLuggageOverByEmployee/${session.user.userId}`, {
             headers: {
               Authorization: `Bearer ${session.accessToken}`,
             },
@@ -43,7 +43,7 @@ export default function BaggageManagement() {
           console.error("Error fetching turno:", error)
         }
         try {
-          const res = await fetch(`http://localhost:3000/api/v1/luggages/totalLuggageByEmployee/${session.user.userId}`, {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/luggages/totalLuggageByEmployee/${session.user.userId}`, {
             headers: {
               Authorization: `Bearer ${session.accessToken}`,
             },
@@ -55,7 +55,7 @@ export default function BaggageManagement() {
           console.error("Error fetching turno:", error)
         }
         try {
-          const res = await fetch(`http://localhost:3000/api/v1/luggages/luggagesByEmployeeNow/${session.user.userId}`, {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/luggages/luggagesByEmployeeNow/${session.user.userId}`, {
             headers: {
               Authorization: `Bearer ${session.accessToken}`,
             },

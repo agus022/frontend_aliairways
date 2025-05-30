@@ -22,7 +22,7 @@ export default function AirportsPage() {
     const session = await getSession();
     const token = session?.accessToken;
 
-    const res = await fetch('http://localhost:3000/api/v1/airports', {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/airports`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     const data = await res.json();
@@ -51,8 +51,8 @@ export default function AirportsPage() {
 
     const method = editMode ? 'PUT' : 'POST';
     const endpoint = editMode
-      ? `http://localhost:3000/api/v1/airports/${editingAirportId}`
-      : 'http://localhost:3000/api/v1/airports';
+      ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/airports/${editingAirportId}`
+      : `${process.env.NEXT_PUBLIC_BACKEND_URL}/airports`;
 
     await fetch(endpoint, {
       method,
@@ -85,7 +85,7 @@ export default function AirportsPage() {
     const session = await getSession();
     const token = session?.accessToken;
 
-    await fetch(`http://localhost:3000/api/v1/airports/${id}`, {
+    await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/airports/${id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
     });

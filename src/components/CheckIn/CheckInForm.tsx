@@ -49,7 +49,7 @@ export default function CheckInForm() {
     e.preventDefault()
     if (session?.user?.userId && session?.accessToken) {
       try {
-        const response = await fetch("http://localhost:3000/api/v1/checkins/getData", {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/checkins/getData`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

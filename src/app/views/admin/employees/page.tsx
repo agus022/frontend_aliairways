@@ -42,11 +42,11 @@ const session = await getSession();
   const headers = { Authorization: `Bearer ${session?.accessToken}` };
 
   const [empRes, jobRes, shiftRes, userRes, flightRes] = await Promise.all([
-    fetch('http://localhost:3000/api/v1/employees', { headers }),
-    fetch('http://localhost:3000/api/v1/jobs', { headers }),
-    fetch('http://localhost:3000/api/v1/shifts', { headers }),
-    fetch('http://localhost:3000/api/v1/users', { headers }),
-    fetch('http://localhost:3000/api/v1/flights', { headers }),
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/employees`, { headers }),
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/jobs`, { headers }),
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/shifts`, { headers }),
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users`, { headers }),
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/flights`, { headers }),
   ]);
 
   const allFlights = await flightRes.json();
@@ -83,8 +83,8 @@ const session = await getSession();
     const session = await getSession();
     const method = editMode ? 'PUT' : 'POST';
     const url = editMode
-      ? `http://localhost:3000/api/v1/employees/${editingId}`
-      : 'http://localhost:3000/api/v1/employees';
+      ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/employees/${editingId}`
+      : `${process.env.NEXT_PUBLIC_BACKEND_URL}/employees`;
 
     await fetch(url, {
       method,
@@ -108,7 +108,7 @@ const session = await getSession();
 
   const handleDelete = async (id) => {
     const session = await getSession();
-    await fetch(`http://localhost:3000/api/v1/employees/${id}`, {
+    await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/employees/${id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${session?.accessToken}` },
     });
@@ -120,7 +120,7 @@ const session = await getSession();
   if (!selectedEmployee || !selectedFlight) return;
 
   const session = await getSession();
-  await fetch(`http://localhost:3000/api/v1/employees/flight-employees`, {
+  await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/employees/flight-employees`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

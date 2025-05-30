@@ -31,8 +31,8 @@ export default function UsersPage() {
     const session = await getSession();
     const token = session?.accessToken;
     const url = searchTerm
-      ? `http://localhost:3000/api/v1/users/search?email=${searchTerm}`
-      : 'http://localhost:3000/api/v1/users';
+      ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/search?email=${searchTerm}`
+      : `${process.env.NEXT_PUBLIC_BACKEND_URL}/users`;
 
     const res = await fetch(url, {
       headers: { Authorization: `Bearer ${token}` },
@@ -48,7 +48,7 @@ export default function UsersPage() {
     const token = session?.accessToken;
 
     const method = editMode ? 'PUT' : 'POST';
-    const endpoint = editMode ? `http://localhost:3000/api/v1/users/${editingUserId}` : 'http://localhost:3000/api/v1/users/register';
+    const endpoint = editMode ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/${editingUserId}` : `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/register`;
     const body = editMode ? {
       username: form.username,
       email: form.email,
@@ -82,7 +82,7 @@ export default function UsersPage() {
   const handleDelete = async (id) => {
     const session = await getSession();
     const token = session?.accessToken;
-    await fetch(`http://localhost:3000/api/v1/users/${id}`, {
+    await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/${id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -92,7 +92,7 @@ export default function UsersPage() {
   const fetchRoles = async () => {
     const session = await getSession();
     const token = session?.accessToken;
-    const res = await fetch('http://localhost:3000/api/v1/roles', {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/roles`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     const data = await res.json();

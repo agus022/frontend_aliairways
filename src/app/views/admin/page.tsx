@@ -6,40 +6,6 @@ import { Bar,Doughnut,Line } from 'react-chartjs-2';
 import {Chart as ChartJS,BarElement,CategoryScale,LinearScale,Tooltip,Legend,LineElement, PointElement,} from 'chart.js';
 import { ArcElement } from 'chart.js';
 
-
-
-
-// const generatePDF = async (sectionId: string, fileName: string) => {
-//   console.log(`Generando PDF para: ${sectionId}`);
-
-//   if (typeof window === 'undefined') return;
-
-//   const element = document.getElementById(sectionId);
-//   if (!element) return;
-
-//   // Convertir los canvas a imágenes para que html2pdf los renderice correctamente
-//   const canvases = element.querySelectorAll('canvas');
-//   canvases.forEach((canvas) => {
-//     const image = document.createElement('img');
-//     image.src = canvas.toDataURL();
-//     image.style.maxWidth = '100%';
-//     canvas.parentNode?.replaceChild(image, canvas);
-//   });
-
-//   const html2pdf = (await import('html2pdf.js')).default;
-
-//   const opt = {
-//     margin: 0.5,
-//     filename: `${fileName}.pdf`,
-//     image: { type: 'jpeg', quality: 0.98 },
-//     html2canvas: { scale: 2 },
-//     jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
-//   };
-
-//   await html2pdf().from(element).set(opt).save();
-//   console.log('PDF generado con éxito');
-// };
-
 ChartJS.register(BarElement, CategoryScale, LinearScale,ArcElement,LineElement,PointElement, Tooltip, Legend);
 
 const FlightPerformanceSection = () => {
@@ -120,16 +86,29 @@ const FlightPerformanceSection = () => {
     fetchTotalFlights();
 
     const fetchFlightData = async () => {
-      const session = await getSession();
-      const token = session?.accessToken;
+  try {
+    const session = await getSession();
+    const token = session?.accessToken;
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/flights/dashboard/flights-over-time?range=${filter}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = await res.json();
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/flights/dashboard/flights-over-time?range=${filter}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await res.json();
+
+    
+    if (Array.isArray(data)) {
       setFlightData(data);
+    } else {
+      console.warn('La respuesta no es un arreglo:', data);
+      setFlightData([]);
+    }
+  } catch (error) {
+    console.error('Error al obtener datos de vuelos en el tiempo:', error);
+    setFlightData([]);
+  }
     };
     fetchFlightData();
 
@@ -284,11 +263,11 @@ const FlightPerformanceSection = () => {
           <div className="h-60 bg-gray-100 rounded flex items-center justify-center text-gray-400">
             <Bar
               data={{
-                labels: flightData.map(item => item.label),
+                labels: Array.isArray(flightData) ? flightData.map(item => item.label) : [],
                 datasets: [
                   {
                     label: 'Total de Vuelos',
-                    data: flightData.map(item => item.total),
+                    data: Array.isArray(flightData) ? flightData.map(item => item.total) : [],
                     backgroundColor: '#3b82f6', // azul
                   },
                 ],
@@ -364,22 +343,22 @@ const FinancialSummarySection = () => {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="bg-white p-6 rounded shadow">
           <h3 className="text-sm text-gray-500 mb-1">Ingresos Totales</h3>
-          <p className="text-3xl font-bold text-gray-900"> ${financialData.total_income.toLocaleString()}</p>
+          <p className="text-3xl font-bold text-gray-900"> ${Number(financialData.total_income || 0).toLocaleString()}</p>
           <p className="text-green-600 text-sm">Generado por vuelos</p>
         </div>
         <div className="bg-white p-6 rounded shadow">
           <h3 className="text-sm text-gray-500 mb-1">Gastos Totales</h3>
-          <p className="text-3xl font-bold text-red-500">${financialData.total_expenses.toLocaleString()}</p>
+          <p className="text-3xl font-bold text-red-500">${Number(financialData.total_expenses || 0).toLocaleString()}</p>
           <p className="text-gray-600 text-sm">Costo operativo general</p>
         </div>
         <div className="bg-white p-6 rounded shadow">
           <h3 className="text-sm text-gray-500 mb-1">Gastos por Empleados</h3>
-          <p className="text-2xl font-bold text-gray-900"> ${financialData.employee_expenses.toLocaleString()}</p>
+          <p className="text-2xl font-bold text-gray-900"> ${Number(financialData.employee_expenses || 0).toLocaleString()}</p>
           <p className="text-gray-600 text-sm">Salarios y beneficios</p>
         </div>
         <div className="bg-white p-6 rounded shadow">
           <h3 className="text-sm text-gray-500 mb-1">Combustible y Mantenimiento</h3>
-          <p className="text-2xl font-bold text-gray-900">${financialData.maintenance_fuel_expenses.toLocaleString()}</p>
+          <p className="text-2xl font-bold text-gray-900">${Number(financialData.maintenance_fuel_expenses || 0).toLocaleString()}</p>
           <p className="text-gray-600 text-sm">Costos técnicos</p>
         </div>
       </div>

@@ -48,7 +48,7 @@ export default function ReservationCard({ reservation }: ReservationCardProps) {
   }
   const handleCancell=async()=>{
     try {
-        const res =await fetch(`http://localhost:3000/api/v1/reservations/cancelReservation/${reservation.reservation_id}`, {
+        const res =await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/reservations/cancelReservation/${reservation.reservation_id}`, {
             method: "GET",
             headers: {
               Authorization: `Bearer ${session?.accessToken}`,

@@ -29,7 +29,7 @@ const FlightResults = () => {
           passengers,
         })
 
-        const response = await fetch(`http://localhost:3000/api/v1/flights/search/flights?${query.toString()}`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/flights/search/flights?${query.toString()}`)
         const data = await response.json()
         console.log(data);
         setFlights(

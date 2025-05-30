@@ -20,7 +20,7 @@ export default function RolesPage() {
     try {
       const session = await getSession();
       const token = session?.accessToken;
-      const url = searchTerm? `http://localhost:3000/api/v1/roles/search?name=${searchTerm}`: 'http://localhost:3000/api/v1/roles';
+      const url = searchTerm? `${process.env.NEXT_PUBLIC_BACKEND_URL}/roles/search?name=${searchTerm}`: `${process.env.NEXT_PUBLIC_BACKEND_URL}/roles`;
 
       const res = await fetch(url, {
         headers: {
@@ -41,7 +41,7 @@ export default function RolesPage() {
       const token = session?.accessToken;
 
       if (editMode) {
-        await fetch(`http://localhost:3000/api/v1/roles/${editingRoleId}`, {
+        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/roles/${editingRoleId}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -50,7 +50,7 @@ export default function RolesPage() {
           body: JSON.stringify({ name: newRoleName }),
         });
       } else {
-        await fetch('http://localhost:3000/api/v1/roles', {
+        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/roles`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -80,7 +80,7 @@ export default function RolesPage() {
     try {
       const session = await getSession();
       const token = session?.accessToken;
-      await fetch(`http://localhost:3000/api/v1/roles/${id}`, {
+      await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/roles/${id}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,

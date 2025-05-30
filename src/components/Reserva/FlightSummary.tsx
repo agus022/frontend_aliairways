@@ -14,15 +14,15 @@ const FlightSummary = ({ flightId }: FlightSummaryProps) => {
   useEffect(() => {
     const fetchAllData = async () => {
       try {
-        const resData = await fetch(`http://localhost:3000/api/v1/flights/${flightId}`)
+        const resData = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/flights/${flightId}`)
         const flightData = await resData.json()
         setFlight(flightData)
 
-        const resOrigin = await fetch(`http://localhost:3000/api/v1/airports/${flightData.origin_id}`)
+        const resOrigin = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/airports/${flightData.origin_id}`)
         const originData = await resOrigin.json()
         setOrigin(originData)
 
-        const resDest = await fetch(`http://localhost:3000/api/v1/airports/${flightData.destination_id}`)
+        const resDest = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/airports/${flightData.destination_id}`)
         const destinationData = await resDest.json()
         setDestination(destinationData)
       } catch (error) {

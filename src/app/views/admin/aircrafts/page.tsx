@@ -19,8 +19,8 @@ export default function AircraftsPage() {
     const session = await getSession();
     const token = session?.accessToken;
     const url = searchTerm
-      ? `http://localhost:3000/api/v1/aircrafts/search/${searchTerm}`
-      : 'http://localhost:3000/api/v1/aircrafts';
+      ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/aircrafts/search/${searchTerm}`
+      : `${process.env.NEXT_PUBLIC_BACKEND_URL}/aircrafts`;
 
     const res = await fetch(url, {
       headers: { Authorization: `Bearer ${token}` },
@@ -40,8 +40,8 @@ export default function AircraftsPage() {
 
     const method = editMode ? 'PUT' : 'POST';
     const endpoint = editMode
-      ? `http://localhost:3000/api/v1/aircrafts/${editingAircraftId}`
-      : 'http://localhost:3000/api/v1/aircrafts';
+      ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/aircrafts/${editingAircraftId}`
+      : `${process.env.NEXT_PUBLIC_BACKEND_URL}/aircrafts`;
 
     await fetch(endpoint, {
       method,
@@ -76,7 +76,7 @@ export default function AircraftsPage() {
     const session = await getSession();
     const token = session?.accessToken;
 
-    await fetch(`http://localhost:3000/api/v1/aircrafts/${id}`, {
+    await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/aircrafts/${id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
     });

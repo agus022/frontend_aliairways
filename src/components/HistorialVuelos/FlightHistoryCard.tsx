@@ -51,13 +51,13 @@ export default function FlightHistoryCard({ flight }: FlightHistoryCardProps) {
     if (session?.accessToken) {
       const fetchAllData = async () => {
         try {
-          const resRes = await fetch(`http://localhost:3000/api/v1/reservetions/${flight.bookingReference}`, {
+          const resRes = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/reservetions/${flight.bookingReference}`, {
             headers: { Authorization: `Bearer ${session.accessToken}` },
           });
           const reservationData = await resRes.json();
           setReservation(reservationData);
 
-          const resCheck = await fetch(`http://localhost:3000/api/v1/checkins/${flight.bookingReference}`, {
+          const resCheck = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/checkins/${flight.bookingReference}`, {
             headers: { Authorization: `Bearer ${session.accessToken}` },
           });
 
@@ -70,12 +70,12 @@ export default function FlightHistoryCard({ flight }: FlightHistoryCardProps) {
           const checkinData = await resCheck.json();
           setCheckin(checkinData);
 
-          const resSeat = await fetch(`http://localhost:3000/api/v1/seats/${reservationData.aircraft_id}/${reservationData.seat_id}`, {
+          const resSeat = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/seats/${reservationData.aircraft_id}/${reservationData.seat_id}`, {
             headers: { Authorization: `Bearer ${session.accessToken}` },
           });
           setSeat(await resSeat.json());
 
-          const resPay = await fetch(`http://localhost:3000/api/v1/payments/${reservationData.payment_id}`, {
+          const resPay = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/payments/${reservationData.payment_id}`, {
             headers: { Authorization: `Bearer ${session.accessToken}` },
           });
           setPayment(await resPay.json());

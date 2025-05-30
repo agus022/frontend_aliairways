@@ -20,8 +20,8 @@ export default function ShiftsPage() {
     const session = await getSession();
     const token = session?.accessToken;
     const url = searchTerm
-      ? `http://localhost:3000/api/v1/shifts/${searchTerm}`
-      : 'http://localhost:3000/api/v1/shifts';
+      ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/shifts/${searchTerm}`
+      : `${process.env.NEXT_PUBLIC_BACKEND_URL}/shifts`;
 
     const res = await fetch(url, {
       headers: { Authorization: `Bearer ${token}` },
@@ -41,8 +41,8 @@ export default function ShiftsPage() {
 
     const method = editMode ? 'PUT' : 'POST';
     const endpoint = editMode
-      ? `http://localhost:3000/api/v1/shifts/${editingShiftId}`
-      : 'http://localhost:3000/api/v1/shifts';
+      ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/shifts/${editingShiftId}`
+      : `${process.env.NEXT_PUBLIC_BACKEND_URL}/shifts`;
 
     await fetch(endpoint, {
       method,
@@ -75,7 +75,7 @@ export default function ShiftsPage() {
     const session = await getSession();
     const token = session?.accessToken;
 
-    await fetch(`http://localhost:3000/api/v1/shifts/${id}`, {
+    await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/shifts/${id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
     });

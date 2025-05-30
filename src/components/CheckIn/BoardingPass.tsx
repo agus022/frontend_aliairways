@@ -43,7 +43,7 @@ export default function BoardingPass({ selectedSeat, onBack, flightData, lastNam
     if (session?.user?.userId && session?.accessToken) {
       const fetchAllData = async () => {
         try {
-          const resFlig = await fetch("http://localhost:3000/api/v1/checkins/getData", {
+          const resFlig = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/checkins/getData`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -72,11 +72,11 @@ export default function BoardingPass({ selectedSeat, onBack, flightData, lastNam
 
           setLocalFlightData(mappedData)
 
-          const resOrigin = await fetch(`http://localhost:3000/api/v1/airports/${mappedData.origin_id}`)
+          const resOrigin = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/airports/${mappedData.origin_id}`)
           const originData = await resOrigin.json();
           setOrigin(originData);
 
-          const resDest = await fetch(`http://localhost:3000/api/v1/airports/${mappedData.destination_id}`)
+          const resDest = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/airports/${mappedData.destination_id}`)
           const destinationData = await resDest.json();
           setDestination(destinationData);
 
@@ -106,7 +106,7 @@ export default function BoardingPass({ selectedSeat, onBack, flightData, lastNam
   const handleDownload = async () => {
     if (session?.user?.userId && session?.accessToken) {
       try {
-        const response = await fetch("http://localhost:3000/api/v1/checkins", {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/checkins`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

@@ -31,7 +31,7 @@ export default function FlightHistory() {
     if (session?.user?.userId && session?.accessToken) {
       const fetchFlightSummary = async () => {
         try {
-          const res = await fetch(`http://localhost:3000/api/v1/passengers/historial/${session.user.userId}`, {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/passengers/historial/${session.user.userId}`, {
             headers: {
               Authorization: `Bearer ${session.accessToken}`,
             },
@@ -47,7 +47,7 @@ export default function FlightHistory() {
 
       const fetchFlightHistory = async () => {
         try {
-          const res = await fetch(`http://localhost:3000/api/v1/passengers/historialFlights/${session.user.userId}`, {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/passengers/historialFlights/${session.user.userId}`, {
             headers: {
               Authorization: `Bearer ${session.accessToken}`,
             },

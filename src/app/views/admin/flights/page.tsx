@@ -33,7 +33,7 @@ export default function FlightsPage() {
     const session = await getSession();
     const token = session?.accessToken;
 
-    const res = await fetch('http://localhost:3000/api/v1/flights/enriched', {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/flights/enriched`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -48,10 +48,10 @@ export default function FlightsPage() {
     const token = session?.accessToken;
 
     const [aircraftRes, airportRes] = await Promise.all([
-      fetch('http://localhost:3000/api/v1/aircrafts', {
+      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/aircrafts`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch('http://localhost:3000/api/v1/airports', {
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/airports`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -88,8 +88,8 @@ export default function FlightsPage() {
 
     const method = editMode ? 'PUT' : 'POST';
     const endpoint = editMode
-      ? `http://localhost:3000/api/v1/flights/${editingFlightId}`
-      : 'http://localhost:3000/api/v1/flights';
+      ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/flights/${editingFlightId}`
+      : `${process.env.NEXT_PUBLIC_BACKEND_URL}/flights`;
 
     await fetch(endpoint, {
       method,
@@ -152,7 +152,7 @@ const handleEdit = (flight) => {
     const session = await getSession();
     const token = session?.accessToken;
 
-    await fetch(`http://localhost:3000/api/v1/flights/${id}`, {
+    await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/flights/${id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
     });

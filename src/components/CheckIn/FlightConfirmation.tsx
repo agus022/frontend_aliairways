@@ -55,11 +55,11 @@ export default function FlightConfirmation({ onConfirm, onBack,  CheckData }: Fl
   useEffect(()=>{
     const fetchAllData= async ()=>{
       try{
-       const res= await fetch(`http://localhost:3000/api/v1/airports/${CheckData.origin_id}`)
+       const res= await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/airports/${CheckData.origin_id}`)
        const originData=await res.json();
        setOrigin(originData);
 
-       const resDes=await fetch(`http://localhost:3000/api/v1/airports/${CheckData.destination_id}`)
+       const resDes=await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/airports/${CheckData.destination_id}`)
        const destinationData=await resDes.json();
        setDestintion(destinationData);
       }catch(error){

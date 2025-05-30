@@ -45,7 +45,7 @@ export default function SeatSelection({ onSeatSelect, onBack, flighData }: SeatS
     const fetchSeats = async () => {
       if (session?.user?.userId && session?.accessToken) {
         try {
-          const res = await fetch(`http://localhost:3000/api/v1/seats/getSeatFlight/${flighData.flight_id}`, {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/seats/getSeatFlight/${flighData.flight_id}`, {
             headers: {
               Authorization: `Bearer ${session.accessToken}`
             }
@@ -119,7 +119,7 @@ export default function SeatSelection({ onSeatSelect, onBack, flighData }: SeatS
     const seatClass = getSeatClass(seatId);
      if (session?.user?.userId && session?.accessToken && selectedSeat && flighData?.flight_id) {
     try {
-      const res = await fetch(`http://localhost:3000/api/v1/seats/updateSeatReservation/${flighData.reservation_id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/seats/updateSeatReservation/${flighData.reservation_id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -153,7 +153,7 @@ export default function SeatSelection({ onSeatSelect, onBack, flighData }: SeatS
   const handleContinue = async () => {
   if (session?.user?.userId && session?.accessToken && selectedSeat && flighData?.flight_id) {
     try {
-      const res = await fetch(`http://localhost:3000/api/v1/seats/getSeatFlight/${flighData.flight_id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/seats/getSeatFlight/${flighData.flight_id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

@@ -29,7 +29,7 @@ const FlightCard = ({ flight }: FlightCardProps) => {
         <div className="flex items-center mb-4 md:mb-0 md:w-1/5">
           <div className="w-12 h-12 relative mr-3">
             <Image
-              src={flight.airlineLogo || "images/logo/logo-2.svg"}
+              src={flight.airlineLogo || "images/logo/logo-2.png"}
               alt={flight.airline}
               fill
               className="object-contain"

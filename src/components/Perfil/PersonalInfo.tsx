@@ -30,7 +30,7 @@ export default function PersonalInfo() {
     const fetchUserData = async () => {
       if (session?.user?.userId && session?.accessToken) {
         try {
-          const res = await fetch(`http://localhost:3000/api/v1/users/profile/${session.user.userId}`, {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/profile/${session.user.userId}`, {
             headers: {
               Authorization: `Bearer ${session.accessToken}`,
             },
@@ -69,7 +69,7 @@ export default function PersonalInfo() {
     setIsEditing(false)
 
     try {
-      const res = await fetch(`http://localhost:3000/api/v1/passengers/${session.user.userId}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/passengers/${session.user.userId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -105,7 +105,7 @@ const UploadImage = () => {
     formData.append("image", file);
     formData.append("userId",session.user.userId)
 
-    const res = await fetch("http://localhost:3000/api/v1/bucket/bucketImagen", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/bucket/bucketImagen`, {
       method: "POST",
       body: formData,
       headers:{

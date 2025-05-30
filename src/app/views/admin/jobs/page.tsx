@@ -19,7 +19,7 @@ export default function JobsPage() {
   const fetchJobs = async () => {
     const session = await getSession();
     const token = session?.accessToken;
-    const res = await fetch('http://localhost:3000/api/v1/jobs', {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/jobs`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     const data = await res.json();
@@ -32,8 +32,8 @@ export default function JobsPage() {
     const token = session?.accessToken;
 
     const endpoint = editMode
-      ? `http://localhost:3000/api/v1/jobs/${editingId}`
-      : 'http://localhost:3000/api/v1/jobs';
+      ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/jobs/${editingId}`
+      : `${process.env.NEXT_PUBLIC_BACKEND_URL}/jobs`;
 
     await fetch(endpoint, {
       method: editMode ? 'PUT' : 'POST',
@@ -64,7 +64,7 @@ export default function JobsPage() {
   const handleDelete = async (id) => {
     const session = await getSession();
     const token = session?.accessToken;
-    await fetch(`http://localhost:3000/api/v1/jobs/${id}`, {
+    await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/jobs/${id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
     });

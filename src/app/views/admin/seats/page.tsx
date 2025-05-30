@@ -28,7 +28,7 @@ export default function SeatsPage() {
   const fetchSeats = async () => {
     const session = await getSession();
     const token = session?.accessToken;
-    const res = await fetch('http://localhost:3000/api/v1/seats', {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/seats`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     const data = await res.json();
@@ -38,7 +38,7 @@ export default function SeatsPage() {
   const fetchAircrafts = async () => {
     const session = await getSession();
     const token = session?.accessToken;
-    const res = await fetch('http://localhost:3000/api/v1/aircrafts', {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/aircrafts`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     const data = await res.json();
@@ -52,8 +52,8 @@ export default function SeatsPage() {
     const headers = { Authorization: `Bearer ${session?.accessToken}` };
 
     const [seatRes, aircraftRes] = await Promise.all([
-      fetch('http://localhost:3000/api/v1/seats', { headers }),
-      fetch('http://localhost:3000/api/v1/aircrafts', { headers }),
+      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/seats`, { headers }),
+      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/aircrafts`, { headers }),
     ]);
 
     const seatData = await seatRes.json();
@@ -74,8 +74,8 @@ export default function SeatsPage() {
 
     const method = editMode ? 'PUT' : 'POST';
     const url = editMode
-      ? `http://localhost:3000/api/v1/seats/${editing.aircraft_id}/${editing.seat_id}`
-      : 'http://localhost:3000/api/v1/seats';
+      ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/seats/${editing.aircraft_id}/${editing.seat_id}`
+      : `${process.env.NEXT_PUBLIC_BACKEND_URL}/seats`;
 
     await fetch(url, {
       method,
@@ -109,7 +109,7 @@ export default function SeatsPage() {
   const handleDelete = async (aircraft_id, seat_id) => {
     const session = await getSession();
     const token = session?.accessToken;
-    await fetch(`http://localhost:3000/api/v1/seats/${aircraft_id}/${seat_id}`, {
+    await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/seats/${aircraft_id}/${seat_id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
     });

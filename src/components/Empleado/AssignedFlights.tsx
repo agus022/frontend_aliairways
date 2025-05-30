@@ -17,7 +17,7 @@ export default function AssignedFlights() {
     if(session?.user?.userId && session?.accessToken){
         const fetchAllData=async () =>{
           try{
-            const res = await fetch(`http://localhost:3000/api/v1/flights/employee/flightsNow/${session.user.userId}`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/flights/employee/flightsNow/${session.user.userId}`, {
               headers: {
                 Authorization: `Bearer ${session.accessToken}`,
               },
@@ -29,7 +29,7 @@ export default function AssignedFlights() {
               console.error(error);
           }
           try{
-            const res = await fetch(`http://localhost:3000/api/v1/flights/employee/flightsAfter/${session.user.userId}`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/flights/employee/flightsAfter/${session.user.userId}`, {
               headers: {
                 Authorization: `Bearer ${session.accessToken}`,
               },
@@ -41,7 +41,7 @@ export default function AssignedFlights() {
               console.error(error);
           }
           try{
-            const res = await fetch(`http://localhost:3000/api/v1/flights/employee/flightsBefore/${session.user.userId}`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/flights/employee/flightsBefore/${session.user.userId}`, {
               headers: {
                 Authorization: `Bearer ${session.accessToken}`,
               },

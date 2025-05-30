@@ -24,7 +24,7 @@ const SignupPage = () => {
     setMessage('');
 
     try {
-      const res = await fetch('http://localhost:3000/api/v1/users/register', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, role_id: 3 }),

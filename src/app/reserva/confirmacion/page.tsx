@@ -5,7 +5,11 @@ interface PageProps {
   searchParams: Record<string, string | string[] | undefined>
 }
 
-export default function ConfirmationPage({ searchParams }: PageProps) {
+export default function ConfirmationPage({
+  searchParams,
+}: {
+  searchParams?: { [key: string]: string | string[] | undefined }
+}) {
 const reservationId = typeof searchParams.id === "string" ? searchParams.id : "unknown"
   return (
     <section className="py-16 md:py-20 lg:py-28">

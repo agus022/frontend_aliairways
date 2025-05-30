@@ -9,36 +9,36 @@ import { ArcElement } from 'chart.js';
 
 
 
-const generatePDF = async (sectionId: string, fileName: string) => {
-  console.log(`Generando PDF para: ${sectionId}`);
+// const generatePDF = async (sectionId: string, fileName: string) => {
+//   console.log(`Generando PDF para: ${sectionId}`);
 
-  if (typeof window === 'undefined') return;
+//   if (typeof window === 'undefined') return;
 
-  const element = document.getElementById(sectionId);
-  if (!element) return;
+//   const element = document.getElementById(sectionId);
+//   if (!element) return;
 
-  // Convertir los canvas a imágenes para que html2pdf los renderice correctamente
-  const canvases = element.querySelectorAll('canvas');
-  canvases.forEach((canvas) => {
-    const image = document.createElement('img');
-    image.src = canvas.toDataURL();
-    image.style.maxWidth = '100%';
-    canvas.parentNode?.replaceChild(image, canvas);
-  });
+//   // Convertir los canvas a imágenes para que html2pdf los renderice correctamente
+//   const canvases = element.querySelectorAll('canvas');
+//   canvases.forEach((canvas) => {
+//     const image = document.createElement('img');
+//     image.src = canvas.toDataURL();
+//     image.style.maxWidth = '100%';
+//     canvas.parentNode?.replaceChild(image, canvas);
+//   });
 
-  const html2pdf = (await import('html2pdf.js')).default;
+//   const html2pdf = (await import('html2pdf.js')).default;
 
-  const opt = {
-    margin: 0.5,
-    filename: `${fileName}.pdf`,
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2 },
-    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
-  };
+//   const opt = {
+//     margin: 0.5,
+//     filename: `${fileName}.pdf`,
+//     image: { type: 'jpeg', quality: 0.98 },
+//     html2canvas: { scale: 2 },
+//     jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
+//   };
 
-  await html2pdf().from(element).set(opt).save();
-  console.log('PDF generado con éxito');
-};
+//   await html2pdf().from(element).set(opt).save();
+//   console.log('PDF generado con éxito');
+// };
 
 ChartJS.register(BarElement, CategoryScale, LinearScale,ArcElement,LineElement,PointElement, Tooltip, Legend);
 
@@ -753,13 +753,13 @@ const AdminDashboardPage = () => {
           <button onClick={() => console.log('Botón presionado')} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
             Reporte de Vuelos
           </button>
-          <button onClick={() => generatePDF('financial-summary-report', 'reporte-finanzas')} className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+          <button className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
             Reporte Financiero
           </button>
-          <button onClick={() => generatePDF('passenger-stats-report', 'reporte-pasajeros')} className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
+          <button className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
             Reporte de Pasajeros
           </button>
-          <button onClick={() => generatePDF('employee-stats-report', 'reporte-empleados')} className="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700">
+          <button className="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700">
             Reporte de Empleados
           </button>
         </div>

@@ -1,13 +1,12 @@
 import Link from "next/link"
 import { CheckCircle } from "lucide-react"
 
-export default function ConfirmationPage({
-  searchParams,
-}: {
-  searchParams: { id: string }
-}) {
-  const reservationId = searchParams.id || "unknown"
+interface PageProps {
+  searchParams: Record<string, string | string[] | undefined>
+}
 
+export default function ConfirmationPage({ searchParams }: PageProps) {
+const reservationId = typeof searchParams.id === "string" ? searchParams.id : "unknown"
   return (
     <section className="py-16 md:py-20 lg:py-28">
       <div className="container">

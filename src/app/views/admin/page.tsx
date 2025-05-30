@@ -6,6 +6,40 @@ import { Bar,Doughnut,Line } from 'react-chartjs-2';
 import {Chart as ChartJS,BarElement,CategoryScale,LinearScale,Tooltip,Legend,LineElement, PointElement,} from 'chart.js';
 import { ArcElement } from 'chart.js';
 
+
+
+
+const generatePDF = async (sectionId: string, fileName: string) => {
+  console.log(`Generando PDF para: ${sectionId}`);
+
+  if (typeof window === 'undefined') return;
+
+  const element = document.getElementById(sectionId);
+  if (!element) return;
+
+  // Convertir los canvas a imágenes para que html2pdf los renderice correctamente
+  const canvases = element.querySelectorAll('canvas');
+  canvases.forEach((canvas) => {
+    const image = document.createElement('img');
+    image.src = canvas.toDataURL();
+    image.style.maxWidth = '100%';
+    canvas.parentNode?.replaceChild(image, canvas);
+  });
+
+  const html2pdf = (await import('html2pdf.js')).default;
+
+  const opt = {
+    margin: 0.5,
+    filename: `${fileName}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
+  };
+
+  await html2pdf().from(element).set(opt).save();
+  console.log('PDF generado con éxito');
+};
+
 ChartJS.register(BarElement, CategoryScale, LinearScale,ArcElement,LineElement,PointElement, Tooltip, Legend);
 
 const FlightPerformanceSection = () => {
@@ -31,7 +65,7 @@ const FlightPerformanceSection = () => {
           console.warn('No se encontró el token en la sesión');
           return;
         }
-        const res = await fetch(`http://localhost:3000/api/v1/flights/dashboard/kpis?range=${filter}`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/flights/dashboard/kpis?range=${filter}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -51,7 +85,7 @@ const FlightPerformanceSection = () => {
         const session = await getSession();
         const token = session?.accessToken;
 
-        const res = await fetch('http://localhost:3000/api/v1/flights/dashboard/current-flights', {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/flights/dashboard/current-flights`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -70,7 +104,7 @@ const FlightPerformanceSection = () => {
       const session = await getSession();
       const token = session?.accessToken;
 
-      const res = await fetch(`http://localhost:3000/api/v1/flights/dashboard/flights-count`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/flights/dashboard/flights-count`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -89,7 +123,7 @@ const FlightPerformanceSection = () => {
       const session = await getSession();
       const token = session?.accessToken;
 
-      const res = await fetch(`http://localhost:3000/api/v1/flights/dashboard/flights-over-time?range=${filter}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/flights/dashboard/flights-over-time?range=${filter}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -103,7 +137,7 @@ const FlightPerformanceSection = () => {
   }, [filter]);
 
   return (
-    <section className="mt-10">
+    <section className="mt-10" id="flight-performance-report">
       {/* Encabezado y filtro */}
       <div className="flex items-center justify-between mb-4 px-2">
         <h2 className="text-2xl font-bold text-gray-800">Rendimiento de Vuelos</h2>
@@ -292,7 +326,7 @@ const FinancialSummarySection = () => {
       if (!token) return;
 
       try {
-        const res = await fetch(`http://localhost:3000/api/v1/flights/dashboard/financials?range=${filter}`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/flights/dashboard/financials?range=${filter}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -308,7 +342,7 @@ const FinancialSummarySection = () => {
     fetchFinancialSummary();
   }, [filter]);
   return (
-    <section className="mt-10">
+    <section className="mt-10" id="financial-summary-report">
     <div className="flex items-center justify-between mb-4 px-2">
       <h2 className="text-2xl font-bold text-gray-800 mb-4 px-2">Resumen Financiero</h2>
       <div className="flex space-x-2">
@@ -415,8 +449,8 @@ const PassengerStatsSection = () => {
     load_factor_growth_pct: 0,
   });
 
-  const [classData, setClassData] = useState({ Economica: 0, Ejecutiva: 0, Primera: 0 });
-  const passengerGoal = 100000; // Meta ficticia de passengers 
+  const [classData, setClassData] = useState({ economy: 0, premium: 0, first: 0 });
+  const passengerGoal = 50; // Meta ficticia de passengers 
   const [count, setCount] = useState(0);
 
   useEffect(() => {
@@ -426,7 +460,7 @@ const PassengerStatsSection = () => {
     if (!token) return;
 
     try {
-      const res = await fetch(`http://localhost:3000/api/v1/passengers/dashboard/kpis?range=${filter}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/passengers/dashboard/kpis?range=${filter}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -446,13 +480,15 @@ const PassengerStatsSection = () => {
       if (!token) return;
 
       try {
-        const res = await fetch(`http://localhost:3000/api/v1/passengers/dashboard/passenger-by-class?range=${filter}`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/passengers/dashboard/passenger-by-class?range=${filter}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
 
         const data = await res.json();
+        console.log('Datos por clase:', data);
+
         setClassData(data);
       } catch (error) {
         console.error('Error al obtener datos por clase:', error);
@@ -466,7 +502,7 @@ const PassengerStatsSection = () => {
       if (!token) return;
 
       try {
-        const res = await fetch('http://localhost:3000/api/v1/passengers/dashboard/passenger-count', {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/passengers/dashboard/passenger-count`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -481,22 +517,6 @@ const PassengerStatsSection = () => {
 
     fetchPassengerCount();
   }, [filter]);
-
-  //pastel 
-  const doughnutData = {
-    labels: ['Económica', 'Ejecutiva', 'Primera'],
-    datasets: [
-      {
-        data: [classData.Economica, classData.Ejecutiva, classData.Primera],
-        backgroundColor: [
-          'rgb(59, 130, 246)',    // azul
-          'rgb(234, 179, 8)',     // ámbar
-          'rgb(239, 68, 68)',     // rojo
-        ],
-        borderWidth: 1,
-      },
-    ],
-  };
 
   //dona del progreso  para passengers pasajeros al largo del tiempo 
   const data = {
@@ -520,7 +540,7 @@ const PassengerStatsSection = () => {
   };
 
   return (
-    <section className="mt-10">
+    <section className="mt-10"  id="passenger-stats-report">
       <div className="flex items-center justify-between mb-4 px-2">
         <h2 className="text-2xl font-bold text-gray-800">Pasajeros</h2>
         <div className="flex space-x-2">
@@ -583,17 +603,53 @@ const PassengerStatsSection = () => {
         </h3>
         <div className="h-48 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-sm">
           <div className="h-48 bg-gray-100 rounded flex items-center justify-center">
-            <Doughnut
-              data={doughnutData}
-              options={{
-                responsive: true,
-                plugins: {
-                  legend: {
-                    position: 'bottom',
-                  },
-                },
-              }}
-            />
+<Bar
+        data={{
+          labels: ['Económica', 'Primera', 'Premium'],
+          datasets: [
+            {
+              label: 'Cantidad de Pasajeros',
+              data: [classData.economy, classData.first, classData.premium],
+              backgroundColor: [
+                'rgb(59, 130, 246)',    // azul
+                'rgb(234, 179, 8)',     // ámbar
+                'rgb(239, 68, 68)',     // rojo
+              ],
+              borderRadius: 5,
+              barPercentage: 0.6,
+            },
+          ],
+        }}
+        options={{
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => `${ctx.raw} pasajeros`,
+              },
+            },
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                precision: 0,
+              },
+              title: {
+                display: true,
+                text: 'Cantidad de Pasajeros',
+              },
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Clase',
+              },
+            },
+          },
+        }}
+      />
           </div>
         </div>
       </div>
@@ -619,7 +675,7 @@ const EmployeeStatsSection = () => {
       if (!token) return;
 
       try {
-        const res = await fetch('http://localhost:3000/api/v1/employees/dashboard/summary', {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/employees/dashboard/summary`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -635,7 +691,7 @@ const EmployeeStatsSection = () => {
     fetchEmployeeSummary();
   }, []);
   return (
-    <section className="mt-10">
+    <section className="mt-10" id="employee-stats-report">
     <div className="flex items-center justify-between mb-4 px-2">
       <h2 className="text-2xl font-bold text-gray-800 mb-4 px-2">Resumen de Empleados</h2>
     </div>
@@ -666,6 +722,7 @@ const EmployeeStatsSection = () => {
 };
 
 const AdminDashboardPage = () => {
+  
   const { data: session, status } = useSession();
   const router = useRouter();
 
@@ -690,7 +747,26 @@ const AdminDashboardPage = () => {
       <FinancialSummarySection />
       <PassengerStatsSection />
       <EmployeeStatsSection />
+      <section className="mt-16 p-6 bg-white rounded shadow" id="generate-reports">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Generar Reportes (PDFs)</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <button onClick={() => console.log('Botón presionado')} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+            Reporte de Vuelos
+          </button>
+          <button onClick={() => generatePDF('financial-summary-report', 'reporte-finanzas')} className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+            Reporte Financiero
+          </button>
+          <button onClick={() => generatePDF('passenger-stats-report', 'reporte-pasajeros')} className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
+            Reporte de Pasajeros
+          </button>
+          <button onClick={() => generatePDF('employee-stats-report', 'reporte-empleados')} className="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700">
+            Reporte de Empleados
+          </button>
+        </div>
+      </section>
     </section>
+
+    
   );
 };
 

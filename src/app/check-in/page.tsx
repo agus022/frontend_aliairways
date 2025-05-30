@@ -1,18 +1,8 @@
-// app/check-in/[reservation_id]/[last_name]/page.tsx
-import CheckInForm from "@/components/CheckIn/CheckInForm";
-import CheckInSteps from "@/components/CheckIn/CheckInSteps";
+import { Suspense } from 'react'
+import CheckInSteps from '@/components/CheckIn/CheckInSteps'
+import CheckInForm from '@/components/CheckIn/CheckInForm'
 
-export default function CheckInPage({
-  params,
-}: {
-  params: {
-    reservation_id: string;
-    last_name: string;
-  };
-}) {
-  const reservationId = params.reservation_id;
-  const lastName = params.last_name;
-
+export default function CheckInPage() {
   return (
     <section className="py-16 md:py-20 lg:py-28">
       <div className="container">
@@ -29,10 +19,12 @@ export default function CheckInPage({
           <CheckInSteps />
 
           <div className="mt-12">
-            <CheckInForm reservationId={reservationId} lastName={lastName} />
+            <Suspense fallback={<div>Cargando formulario...</div>}>
+              <CheckInForm />
+            </Suspense>
           </div>
         </div>
       </div>
     </section>
-  );
+  )
 }

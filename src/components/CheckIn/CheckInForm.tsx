@@ -1,112 +1,108 @@
 "use client"
 
-import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { Search } from "lucide-react"
 import FlightConfirmation from "./FlightConfirmation"
 import SeatSelection from "./SeatSelection"
 import BoardingPass from "./BoardingPass"
-import { useEffect } from "react"
-import { useSession } from 'next-auth/react';
 
 type CheckInStep = "search" | "confirm" | "seat" | "boarding"
 
-interface flight{
-  reservation_id:number,
-  flight_id:number,
-  model:string,
-  departure_time:string,
-  arrival_time:string,
-  origin_id:string,
-  destination_id:string,
-  departure_date:string,
-  seat:string,
-  class:string,
-  full_name:string,
-  email:string,
-  phone:string,
-  estado:string|null
+interface Flight {
+  reservation_id: number
+  flight_id: number
+  model: string
+  departure_time: string
+  arrival_time: string
+  origin_id: string
+  destination_id: string
+  departure_date: string
+  seat: string
+  class: string
+  full_name: string
+  email: string
+  phone: string
+  estado: string | null
 }
 
-export default function CheckInForm({reservationId,
-  lastName,
-}: {
-  reservationId?: string;
-  lastName?: string;
-}) {
-  
-  //const { flight, passenger, status, createdAt } = reservation
+export default function CheckInForm() {
+  const searchParams = useSearchParams()
+  const reservationIdFromURL = searchParams.get("reservation_id") || ""
+  const lastNameFromURL = searchParams.get("last_name") || ""
 
-  //const { flight, passenger, status, createdAt } = reservation
-  const { data: session, status } = useSession();
-  const [flightData, setFlightData] = useState<flight>(null)
+  const { data: session } = useSession()
+  const [flightData, setFlightData] = useState<Flight | null>(null)
   const [currentStep, setCurrentStep] = useState<CheckInStep>("search")
   const [searchType, setSearchType] = useState<"reservation" | "passenger">("reservation")
+  const [selectedSeat, setSelectedSeat] = useState<string | null>(null)
+
   const [formData, setFormData] = useState({
-    reservationNumber:reservationId || "",
-    lastName: lastName || "",
+    reservationNumber: reservationIdFromURL,
+    lastName: lastNameFromURL,
     firstName: "",
     email: "",
   })
-  const [selectedSeat, setSelectedSeat] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-     if (session?.user?.userId && session?.accessToken) {
-        try {
-          const response = await fetch("http://localhost:3000/api/v1/checkins/getData", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${session.accessToken}`,
-            },
-            body: JSON.stringify({id_reservation: formData.reservationNumber,
-      last_name: formData.lastName}),
-            
-          })
+    if (session?.user?.userId && session?.accessToken) {
+      try {
+        const response = await fetch("http://localhost:3000/api/v1/checkins/getData", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.accessToken}`,
+          },
+          body: JSON.stringify({
+            id_reservation: formData.reservationNumber,
+            last_name: formData.lastName,
+          }),
+        })
 
-          if (!response.ok) {
-            throw new Error("Error al obtener datos de la reserva."+formData.reservationNumber+formData.lastName)
-          }
-
-         const raw = await response.json()
-
-          // Mapea a estructura deseada
-          const mappedData: flight = {
-            reservation_id: raw.reservation_id,
-            flight_id: raw.flight_id,
-            model:raw.model,
-            departure_time: raw.departure_time,
-            arrival_time:raw.arrival_time,
-            origin_id: raw.origin_id,
-            destination_id: raw.destination_id,
-            departure_date: raw.departure_date,
-            seat: raw.seat,
-            class: raw.class,
-            full_name: raw.full_name,
-            email: raw.email,
-            phone: raw.phone,
-            estado: raw.estado ?? null, // Aseguramos null si viene undefined
-          }
-          if (mappedData.estado === null) {
-            setFlightData(mappedData)
-            setCurrentStep("confirm")
-          } else {
-            alert("Este vuelo ya fue registrado para check-in.")
-          }
-        } catch (error) {
-          console.error("Error:", error)
-          alert("No se pudo completar la búsqueda. Verifica los datos."+formData.reservationNumber+formData.lastName)
+        if (!response.ok) {
+          throw new Error("Error al obtener datos de la reserva.")
         }
+
+        const raw = await response.json()
+
+        const mappedData: Flight = {
+          reservation_id: raw.reservation_id,
+          flight_id: raw.flight_id,
+          model: raw.model,
+          departure_time: raw.departure_time,
+          arrival_time: raw.arrival_time,
+          origin_id: raw.origin_id,
+          destination_id: raw.destination_id,
+          departure_date: raw.departure_date,
+          seat: raw.seat,
+          class: raw.class,
+          full_name: raw.full_name,
+          email: raw.email,
+          phone: raw.phone,
+          estado: raw.estado ?? null,
+        }
+
+        if (mappedData.estado === null) {
+          setFlightData(mappedData)
+          setCurrentStep("confirm")
+        } else {
+          alert("Este vuelo ya fue registrado para check-in.")
+        }
+      } catch (error) {
+        console.error("Error:", error)
+        alert("No se pudo completar la búsqueda. Verifica los datos.")
+      }
     }
   }
 
-
   const handleConfirmFlight = () => {
-    if(flightData.seat===null)
+    if (flightData?.seat === null) {
       setCurrentStep("seat")
-    else
+    } else {
       setCurrentStep("boarding")
+    }
   }
 
   const handleSeatSelection = (seat: string) => {
@@ -114,22 +110,38 @@ export default function CheckInForm({reservationId,
     setCurrentStep("boarding")
   }
 
-  const handleBackToSearch = () => {
-    setCurrentStep("search")
-  }
+  const handleBackToSearch = () => setCurrentStep("search")
 
   if (currentStep === "confirm") {
-    return <FlightConfirmation CheckData={flightData} onConfirm={handleConfirmFlight} onBack={handleBackToSearch} />
+    return (
+      <FlightConfirmation
+        CheckData={flightData}
+        onConfirm={handleConfirmFlight}
+        onBack={handleBackToSearch}
+      />
+    )
   }
 
   if (currentStep === "seat") {
-    return <SeatSelection flighData={flightData} onSeatSelect={handleSeatSelection} onBack={() => setCurrentStep("confirm")} />
+    return (
+      <SeatSelection
+        flighData={flightData}
+        onSeatSelect={handleSeatSelection}
+        onBack={() => setCurrentStep("confirm")}
+      />
+    )
   }
 
   if (currentStep === "boarding") {
-    return <BoardingPass flightData={flightData} lastName={formData.lastName} selectedSeat={selectedSeat} onBack={() => setCurrentStep("seat")} />
+    return (
+      <BoardingPass
+        flightData={flightData}
+        lastName={formData.lastName}
+        selectedSeat={selectedSeat}
+        onBack={() => setCurrentStep("seat")}
+      />
+    )
   }
-
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
       <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Buscar tu reservación</h2>

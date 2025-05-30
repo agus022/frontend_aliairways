@@ -1,15 +1,18 @@
 // app/check-in/[reservation_id]/[last_name]/page.tsx
-'use client';
-import type { Metadata } from "next";
 import CheckInForm from "@/components/CheckIn/CheckInForm";
 import CheckInSteps from "@/components/CheckIn/CheckInSteps";
-import { useSearchParams } from 'next/navigation'
 
+export default function CheckInPage({
+  params,
+}: {
+  params: {
+    reservation_id: string;
+    last_name: string;
+  };
+}) {
+  const reservationId = params.reservation_id;
+  const lastName = params.last_name;
 
-export default function CheckInPage() {
-  const searchParams = useSearchParams()
-  const reservationId = searchParams.get("reservationId") || ""
-  const lastName = searchParams.get("lastName") || ""
   return (
     <section className="py-16 md:py-20 lg:py-28">
       <div className="container">

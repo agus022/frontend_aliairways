@@ -1,8 +1,6 @@
 "use client"
 // pages/_app.tsx
 
-
-
 import type React from "react"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
@@ -23,8 +21,10 @@ const Hero = () => {
 
   useEffect(() => {
   const fetchAllData = async () => {
+    console.log(`${process.env.NEXT_PUBLIC_BACKEND_URL}/airports`);
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/airports`)
+      
       if (!res.ok) throw new Error("Error al cargar el turno")
       const data = await res.json()
       setCity(data)

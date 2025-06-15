@@ -14,6 +14,8 @@ export default function MisReservacionesPage() {
   useEffect(()=> {
     if(session?.user?.userId && session?.accessToken) {
       const fetchReservations = async () => {
+        console.log("Haciendo fetch a:", `${process.env.NEXT_PUBLIC_BACKEND_URL}/reservations/reservationsByUser/${session.user.userId}`);
+
         try {
           const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/reservations/reservationsByUser/${session.user.userId}`, {
             method: "GET",
